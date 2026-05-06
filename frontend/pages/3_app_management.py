@@ -9,9 +9,9 @@ import streamlit as st
 from shared.graph_client import GraphClient
 
 st.set_page_config(
-    page_title="App Management — Agentic IAM", page_icon="️", layout="wide"
+    page_title="App Management — Agentic IAM", page_icon="🖥️", layout="wide"
 )
-st.title("️ App Management")
+st.title("🖥️ App Management")
 
 client = GraphClient()
 
@@ -132,7 +132,7 @@ with tab1:
     owner_name = ""
 
     if owner_query and len(owner_query.strip()) >= 2:
-        if st.button(" Search users", key="reg_owner_search"):
+        if st.button("🔍 Search users", key="reg_owner_search"):
             with st.spinner("Searching..."):
                 try:
                     users = asyncio.run(client.search_users(owner_query.strip()))
@@ -180,7 +180,7 @@ with tab1:
 
     # ── Submit ────────────────────────────────────────────────────────────────
     st.divider()
-    if st.button(" Register App", type="primary", key="reg_submit"):
+    if st.button("🚀 Register App", type="primary", key="reg_submit"):
         errors = validate_saml_form(
             display_name, app_type, template_id,
             entity_id, reply_url, sign_on_url, owner_id,
@@ -189,8 +189,6 @@ with tab1:
             for err in errors:
                 st.error(err)
         else:
-            group_ids = resolve_group_ids(selected_group_names, all_groups)
-
             from app_bot.flows.saml_app_onboarding import run_saml_app_onboarding
             from shared.models import AppType, SAMLAppOnboardingRequest
 
@@ -202,7 +200,7 @@ with tab1:
                 reply_url=reply_url.strip(),
                 sign_on_url=sign_on_url.strip() or None,
                 owner_id=owner_id,
-                assigned_group_ids=group_ids,
+                assigned_group_names=selected_group_names,  # names resolved inside flow
                 requested_by="streamlit_admin",
                 source="admin_portal",
             )
@@ -260,7 +258,7 @@ with tab2:
     decom_name    = ""
 
     if app_query and len(app_query.strip()) >= 2:
-        if st.button(" Search apps", key="decom_app_search"):
+        if st.button("🔍 Search apps", key="decom_app_search"):
             with st.spinner("Searching applications..."):
                 try:
                     apps = asyncio.run(client.search_applications(app_query.strip()))
@@ -322,7 +320,7 @@ with tab2:
         key="decom_revoke",
     )
 
-    if st.button(" Decommission App", type="primary", key="decom_submit"):
+    if st.button("🗑 Decommission App", type="primary", key="decom_submit"):
         errors = []
         if not decom_app_id:
             errors.append("No application selected. Search and select an app above.")
@@ -361,3 +359,4 @@ with tab2:
                             st.exception(state["error"])
                 except Exception as exc:
                     st.error(f"Decommission failed: {exc}")
+

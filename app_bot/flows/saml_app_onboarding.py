@@ -96,15 +96,36 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
         )
 
         # ── Step 5: Assign groups ─────────────────────────────────────────────
-        for group_id in request.assigned_group_ids:
-            await client.assign_group_to_app(sp_id, group_id)
-            graph_ops.append(
-                f"POST /servicePrincipals/{sp_id}/appRoleAssignments "
-                f"(group={group_id})"
-            )
-        if request.assigned_group_ids:
+        # Resolve group display names to object IDs before assigning.
+        # Names that cannot be resolved are skipped and logged as warnings.
+        groups_assigned   = 0
+        groups_not_found  = []
+
+        for group_name in request.assigned_group_names:
+            group_name = group_name.strip()
+            if not group_name:
+                continue
+            try:
+                group = await client.get_group_by_name(group_name)
+                if not group:
+                    logger.warning("Group not found, skipping: '%s'", group_name)
+                    groups_not_found.append(group_name)
+                    continue
+                await client.assign_group_to_app(sp_id, group["id"])
+                graph_ops.append(
+                    f"POST /servicePrincipals/{sp_id}/appRoleAssignments "
+                    f"(group='{group_name}' id={group['id']})"
+                )
+                groups_assigned += 1
+                logger.info("Group '%s' assigned to app.", group_name)
+            except Exception as exc:
+                logger.warning("Failed to assign group '%s': %s", group_name, exc)
+                groups_not_found.append(group_name)
+
+        if request.assigned_group_names:
             logger.info(
-                "Assigned %d group(s) to app.", len(request.assigned_group_ids)
+                "Groups: %d assigned, %d not found/failed.",
+                groups_assigned, len(groups_not_found),
             )
 
         # ── Step 6: Add owner ─────────────────────────────────────────────────
@@ -132,7 +153,8 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
                 "sign_on_url":        request.sign_on_url,
                 "cert_thumbprint":    cert_thumbprint,
                 "cert_expiry":        cert_expiry,
-                "groups_assigned":    len(request.assigned_group_ids),
+                "groups_assigned":    groups_assigned,
+                "groups_not_found":  groups_not_found,
                 "source":             request.source,
             },
             graph_operations=graph_ops,
@@ -149,7 +171,8 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
             "saml_sign_on_url":     request.sign_on_url,
             "cert_thumbprint":      cert_thumbprint,
             "cert_expiry":          cert_expiry,
-            "groups_assigned":      len(request.assigned_group_ids),
+            "groups_assigned":      groups_assigned,
+            "groups_not_found":     groups_not_found,
             "status":               "completed",
         }
 
@@ -173,8 +196,7 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
                 "display_name":       request.display_name,
                 "app_type":           request.app_type.value,
                 "graph_ops_completed": graph_ops,
-            },
-        )
+            },        )
         raise
 
 
@@ -269,3 +291,4 @@ async def _create_non_gallery_app(
         object_id, app_id, sp_id,
     )
     return object_id, app_id, sp_id
+

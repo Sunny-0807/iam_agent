@@ -509,7 +509,7 @@ class GraphClient:
             "groups",
             params={
                 "$select": "id,displayName",
-                "$orderby": "displayName",
+                # "$orderby": "displayName",
                 "$top": "999",
             },
         )
