@@ -24,7 +24,7 @@ async def handle_csv_bulk_onboarding(csv_path: str) -> list[BulkAppOnboardingRes
 
     CSV columns:
         display_name, app_type, template_id, entity_id, reply_url,
-        sign_on_url, owner_id, assigned_group_names, requested_by
+        sign_on_url, owner_upn, assigned_group_names, requested_by
 
     assigned_group_names: pipe-separated group display names (resolved to IDs automatically).
     """
@@ -93,7 +93,7 @@ def _build_request(row: dict, row_num: int) -> SAMLAppOnboardingRequest:
     _require_field(row, "app_type",     row_num)
     _require_field(row, "entity_id",    row_num)
     _require_field(row, "reply_url",    row_num)
-    _require_field(row, "owner_id",     row_num)
+    _require_field(row, "owner_upn", row_num)
 
     app_type_raw = _safe(row.get("app_type")).lower()
     if app_type_raw not in ("gallery", "non_gallery"):
@@ -120,7 +120,7 @@ def _build_request(row: dict, row_num: int) -> SAMLAppOnboardingRequest:
         entity_id=_safe(row.get("entity_id")),
         reply_url=_safe(row.get("reply_url")),
         sign_on_url=_safe(row.get("sign_on_url")) or None,
-        owner_id=_safe(row.get("owner_id")),
+        owner_upn=_safe(row.get("owner_upn")),
         assigned_group_names=group_names,   # names — resolved inside flow
         requested_by=_safe(row.get("requested_by")) or "csv_bulk",
         source="csv_bulk",

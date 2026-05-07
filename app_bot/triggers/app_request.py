@@ -50,7 +50,7 @@ async def handle_app_request(request_body: dict) -> dict:
         entity_id=request_body["entity_id"],
         reply_url=request_body["reply_url"],
         sign_on_url=request_body.get("sign_on_url") or None,
-        owner_id=request_body["owner_id"],
+        owner_upn=request_body["owner_upn"],
         assigned_group_names=group_names,
         requested_by=request_body.get("requested_by", "admin_portal"),
     )

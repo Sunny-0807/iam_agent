@@ -129,12 +129,22 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
             )
 
         # ── Step 6: Add owner ─────────────────────────────────────────────────
-        if request.owner_id:
-            await client.add_application_owner(object_id, request.owner_id)
-            graph_ops.append(
-                f"POST /applications/{object_id}/owners/$ref"
-            )
-            logger.info("Owner %s added to application.", request.owner_id)
+        # Resolve owner UPN to object ID before adding.
+        owner_id: str | None = None
+        if request.owner_upn:
+            try:
+                owner_user = await client.get_user_by_upn(request.owner_upn)
+                owner_id   = owner_user["id"]
+                await client.add_application_owner(object_id, owner_id)
+                graph_ops.append(
+                    f"POST /applications/{object_id}/owners/$ref (owner={request.owner_upn})"
+                )
+                logger.info("Owner '%s' (id=%s) added to application.", request.owner_upn, owner_id)
+            except Exception as exc:
+                logger.warning(
+                    "Could not resolve or add owner '%s': %s — proceeding without owner.",
+                    request.owner_upn, exc,
+                )
 
         # ── Step 7: Audit log ─────────────────────────────────────────────────
         await audit.log(

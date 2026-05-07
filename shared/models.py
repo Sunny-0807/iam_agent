@@ -105,7 +105,7 @@ class SAMLAppOnboardingRequest(BaseModel):
     entity_id:           str
     reply_url:           str
     sign_on_url:         str | None = None
-    owner_id:            str
+    owner_upn:           str  # UPN of the app owner — resolved to object ID before Graph API calls
     assigned_group_names: list[str] = Field(default_factory=list)  # group display names — resolved to IDs before Graph API calls
     requested_by:        str
     source:              str = "csv_bulk"

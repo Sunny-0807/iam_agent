@@ -10,13 +10,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import streamlit as st
 
 st.set_page_config(
-    page_title="Bulk CSV — Agentic IAM", page_icon="", layout="wide"
+    page_title="Bulk CSV — Agentic IAM", page_icon="📂", layout="wide"
 )
-st.title(" Bulk SAML App Onboarding")
+st.title("📂 Bulk SAML App Onboarding")
 st.caption("Upload a CSV file to onboard multiple SAML SSO applications in one run.")
 
 # ── CSV format reference ──────────────────────────────────────────────────────
-with st.expander(" Required CSV format", expanded=False):
+with st.expander("📄 Required CSV format", expanded=False):
     st.markdown("""
 | Column | Required | Description |
 |---|---|---|
@@ -26,7 +26,7 @@ with st.expander(" Required CSV format", expanded=False):
 | `entity_id` | ✅ | SAML Entity ID / Identifier URI |
 | `reply_url` | ✅ | ACS URL (must be HTTPS) |
 | `sign_on_url` | optional | SP-initiated login URL |
-| `owner_id` | ✅ | Entra ID object ID of app owner |
+| `owner_upn` | ✅ | UPN of the app owner e.g. admin@company.com |
 | `assigned_group_names` | optional | Pipe-separated group display names e.g. DevOps\|Engineering |
 | `requested_by` | optional | Who is requesting — defaults to csv_bulk |
 
@@ -41,7 +41,7 @@ uploaded = st.file_uploader(
 )
 
 if not uploaded:
-    st.info("Upload a CSV file to get started.", icon="📤")
+    st.info("Upload a CSV file to get started.", icon="📂")
     st.stop()
 
 # ── Parse and preview CSV ─────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ st.dataframe(
 # ── Run button ────────────────────────────────────────────────────────────────
 st.divider()
 col_run, col_info = st.columns([1, 3])
-run_clicked = col_run.button(" Run Bulk Onboarding", type="primary")
+run_clicked = col_run.button("🚀 Run Bulk Onboarding", type="primary")
 col_info.caption(
     f"Will process {len(rows)} app(s). "
     "Failures are logged and the run continues."

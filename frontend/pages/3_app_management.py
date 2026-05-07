@@ -40,7 +40,7 @@ def _is_valid_entity_id(entity_id: str) -> bool:
 
 def validate_saml_form(
     display_name, app_type, template_id,
-    entity_id, reply_url, sign_on_url, owner_id,
+    entity_id, reply_url, sign_on_url, owner_upn,
 ) -> list[str]:
     errors = []
     if not display_name.strip():
@@ -57,7 +57,7 @@ def validate_saml_form(
         errors.append("Reply URL must be a valid HTTPS URL.")
     if sign_on_url.strip() and not _is_valid_https_url(sign_on_url.strip()):
         errors.append("Sign-on URL must be a valid HTTPS URL if provided.")
-    if not owner_id.strip():
+    if not owner_upn.strip():
         errors.append("Owner is required.")
     return errors
 
@@ -128,7 +128,7 @@ with tab1:
         key="reg_owner_query",
     )
 
-    owner_id   = ""
+    owner_upn  = ""
     owner_name = ""
 
     if owner_query and len(owner_query.strip()) >= 2:
@@ -157,10 +157,10 @@ with tab1:
             )
             if sel_label != "(select)":
                 selected_user = options[sel_label]
-                owner_id      = selected_user["id"]
+                owner_upn     = selected_user["userPrincipalName"]
                 owner_name    = selected_user["displayName"]
                 st.success(
-                    f"✅ Owner: **{owner_name}** — `{owner_id}`"
+                    f"✅ Owner: **{owner_name}** — `{owner_upn}`"
                 )
 
     # ── Assigned groups — multiselect dropdown ────────────────────────────────
@@ -183,7 +183,7 @@ with tab1:
     if st.button("🚀 Register App", type="primary", key="reg_submit"):
         errors = validate_saml_form(
             display_name, app_type, template_id,
-            entity_id, reply_url, sign_on_url, owner_id,
+            entity_id, reply_url, sign_on_url, owner_upn,
         )
         if errors:
             for err in errors:
@@ -199,7 +199,7 @@ with tab1:
                 entity_id=entity_id.strip(),
                 reply_url=reply_url.strip(),
                 sign_on_url=sign_on_url.strip() or None,
-                owner_id=owner_id,
+                owner_upn=owner_upn,
                 assigned_group_names=selected_group_names,  # names resolved inside flow
                 requested_by="streamlit_admin",
                 source="admin_portal",
