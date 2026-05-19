@@ -9,9 +9,9 @@ import streamlit as st
 from shared.graph_client import GraphClient
 
 st.set_page_config(
-    page_title="App Management — Agentic IAM", page_icon="🖥️", layout="wide"
+    page_title="App Management — Agentic IAM", page_icon="️", layout="wide"
 )
-st.title("🖥️ App Management")
+st.title("️ App Management")
 
 client = GraphClient()
 
@@ -132,7 +132,7 @@ with tab1:
     owner_name = ""
 
     if owner_query and len(owner_query.strip()) >= 2:
-        if st.button("🔍 Search users", key="reg_owner_search"):
+        if st.button(" Search users", key="reg_owner_search"):
             with st.spinner("Searching..."):
                 try:
                     users = asyncio.run(client.search_users(owner_query.strip()))
@@ -180,7 +180,7 @@ with tab1:
 
     # ── Submit ────────────────────────────────────────────────────────────────
     st.divider()
-    if st.button("🚀 Register App", type="primary", key="reg_submit"):
+    if st.button(" Register App", type="primary", key="reg_submit"):
         errors = validate_saml_form(
             display_name, app_type, template_id,
             entity_id, reply_url, sign_on_url, owner_upn,
@@ -205,7 +205,7 @@ with tab1:
                 source="admin_portal",
             )
 
-            with st.spinner("Registering SAML application..."):
+            with st.spinner("Registering SAML application... (this may take up to 30s for Entra ID propagation)"):
                 try:
                     result = asyncio.run(run_saml_app_onboarding(request))
                     st.success("✅ Application registered successfully!")
@@ -258,7 +258,7 @@ with tab2:
     decom_name    = ""
 
     if app_query and len(app_query.strip()) >= 2:
-        if st.button("🔍 Search apps", key="decom_app_search"):
+        if st.button(" Search apps", key="decom_app_search"):
             with st.spinner("Searching applications..."):
                 try:
                     apps = asyncio.run(client.search_applications(app_query.strip()))
@@ -320,7 +320,7 @@ with tab2:
         key="decom_revoke",
     )
 
-    if st.button("🗑 Decommission App", type="primary", key="decom_submit"):
+    if st.button(" Decommission App", type="primary", key="decom_submit"):
         errors = []
         if not decom_app_id:
             errors.append("No application selected. Search and select an app above.")

@@ -59,6 +59,13 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
         )
 
         # ── Step 2: Set SSO mode to SAML ──────────────────────────────────────
+        # Small safety wait for gallery apps where SP is returned immediately
+        # but may still not be fully propagated.
+        import asyncio as _asyncio
+        if request.app_type.value == "gallery":
+            logger.info("Gallery app: waiting 5s for SP propagation before SAML config...")
+            await _asyncio.sleep(5)
+
         await client.set_saml_sso_mode(sp_id)
         graph_ops.append(
             f"PATCH /servicePrincipals/{sp_id} (preferredSingleSignOnMode=saml)"
@@ -274,8 +281,13 @@ async def _create_non_gallery_app(
 ) -> tuple[str, str, str]:
     """
     Non-gallery app — create app registration then service principal separately.
-    Uses Microsoft's standard non-gallery SAML template ID on the service principal.
+
+    Entra ID has eventual consistency — after POST /applications, the appId
+    is not immediately visible to POST /servicePrincipals. We wait briefly
+    and retry with exponential backoff to handle this propagation delay.
     """
+    import asyncio
+
     logger.info(
         "Non-gallery app: creating registration for '%s'", request.display_name
     )
@@ -290,15 +302,87 @@ async def _create_non_gallery_app(
     graph_ops.append(
         f"POST /applications -> objectId={object_id} appId={app_id}"
     )
-
-    # Create service principal using non-gallery template
-    sp = await client.create_service_principal(app_id)
-    sp_id = sp["id"]
-    graph_ops.append(f"POST /servicePrincipals -> spId={sp_id}")
-
     logger.info(
-        "Non-gallery app created: objectId=%s appId=%s spId=%s",
-        object_id, app_id, sp_id,
+        "App registration created: objectId=%s appId=%s — waiting for propagation...",
+        object_id, app_id,
+    )
+
+    # ── Step 2: Create service principal with propagation retry ─────────────
+    # Entra ID is eventually consistent. After POST /applications, the appId
+    # may not yet be visible on all directory replicas, causing POST
+    # /servicePrincipals to return 400. After SP creation, a GET is used
+    # to confirm the SP is fully reachable before returning — preventing
+    # 404 errors on subsequent PATCH/POST calls that use the SP ID.
+    sp_id    = None
+    last_exc = None
+
+    # Phase A: Create the service principal (retry on 400 propagation errors)
+    sp_create_delays = [5, 10, 15]
+    for attempt, delay in enumerate(sp_create_delays, start=1):
+        logger.info(
+            "SP creation attempt %d/%d — waiting %ds for appId propagation...",
+            attempt, len(sp_create_delays), delay,
+        )
+        await asyncio.sleep(delay)
+        try:
+            sp    = await client.create_service_principal(app_id)
+            sp_id = sp["id"]
+            logger.info("Service principal created: spId=%s", sp_id)
+            break
+        except Exception as exc:
+            last_exc = exc
+            logger.warning(
+                "SP creation attempt %d failed: %s — %s",
+                attempt, type(exc).__name__, exc,
+            )
+            if attempt == len(sp_create_delays):
+                # All retries exhausted — clean up orphaned app registration
+                logger.error(
+                    "All SP creation attempts failed. "
+                    "Cleaning up orphaned app registration objectId=%s.", object_id,
+                )
+                try:
+                    await client.delete_application(object_id)
+                    logger.info("Orphaned app registration deleted: %s", object_id)
+                except Exception as cleanup_exc:
+                    logger.error(
+                        "Failed to clean up orphaned app %s: %s",
+                        object_id, cleanup_exc,
+                    )
+                raise last_exc
+
+    # Phase B: Confirm SP is reachable before returning
+    # Even after creation succeeds, subsequent PATCH/POST calls on the SP
+    # can return 404 if the SP hasn't propagated across all replicas yet.
+    # We verify with a GET and retry until reachable.
+    sp_verify_delays = [3, 5, 8, 10]
+    sp_reachable     = False
+    for attempt, delay in enumerate(sp_verify_delays, start=1):
+        logger.info(
+            "SP reachability check %d/%d — waiting %ds...",
+            attempt, len(sp_verify_delays), delay,
+        )
+        await asyncio.sleep(delay)
+        try:
+            await client._get(f"servicePrincipals/{sp_id}",
+                              params={"$select": "id,appId"})
+            sp_reachable = True
+            logger.info("SP %s confirmed reachable after %d attempt(s).", sp_id, attempt)
+            break
+        except Exception as exc:
+            logger.warning(
+                "SP reachability check %d failed: %s", attempt, exc
+            )
+            if attempt == len(sp_verify_delays):
+                logger.error(
+                    "SP %s not reachable after all checks. "
+                    "Proceeding anyway — subsequent steps may retry.", sp_id,
+                )
+
+    graph_ops.append(f"POST /servicePrincipals -> spId={sp_id}")
+    logger.info(
+        "Non-gallery app fully ready: objectId=%s appId=%s spId=%s reachable=%s",
+        object_id, app_id, sp_id, sp_reachable,
     )
     return object_id, app_id, sp_id
 

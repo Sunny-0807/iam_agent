@@ -321,9 +321,23 @@ class GraphClient:
         """
         POST /servicePrincipals
         Creates a service principal (enterprise app) for a registered application.
+
+        Tags explanation:
+        - "WindowsAzureActiveDirectoryIntegratedApp" — makes the SP appear
+          in the Enterprise Applications blade in the Entra ID portal.
+        - "HideApp" is intentionally NOT included — we want it visible.
+
+        Without these tags, the SP is created in the directory but does NOT
+        appear under Enterprise Applications, which is the common symptom of
+        a missing tag on the service principal.
         """
         logger.info("Creating service principal for appId: %s", app_id)
-        return await self._post("servicePrincipals", {"appId": app_id})
+        return await self._post("servicePrincipals", {
+            "appId": app_id,
+            "tags": [
+                "WindowsAzureActiveDirectoryIntegratedApp",
+            ],
+        })
 
     async def delete_service_principal(self, sp_id: str) -> None:
         """
@@ -493,7 +507,7 @@ class GraphClient:
         return await self._post(
             f"servicePrincipals/{sp_id}/appRoleAssignments", payload
         )
-
+    
 
     # =========================================================================
     # RESOLVER METHODS — groups and licenses
@@ -509,7 +523,7 @@ class GraphClient:
             "groups",
             params={
                 "$select": "id,displayName",
-                # "$orderby": "displayName",
+                "$orderby": "displayName",
                 "$top": "999",
             },
         )
@@ -661,6 +675,41 @@ class GraphClient:
     # SEARCH METHODS
     # =========================================================================
 
+    async def search_users(self, query: str) -> list[dict]:
+        """
+        GET /users?$search="displayName:{query}" OR "userPrincipalName:{query}"
+        Searches users by display name or UPN prefix.
+        Returns up to 10 matching users with id, displayName, userPrincipalName.
+        Requires ConsistencyLevel: eventual header (already set in _headers).
+        """
+        result = await self._get(
+            "users",
+            params={
+                "$search":  f'"displayName:{query}" OR "userPrincipalName:{query}"',
+                "$select":  "id,displayName,userPrincipalName",
+                "$top":     "10",
+                "$orderby": "displayName",
+            },
+        )
+        return result.get("value", [])
+
+    async def search_applications(self, query: str) -> list[dict]:
+        """
+        GET /applications?$search="displayName:{query}"
+        Searches app registrations by display name.
+        Returns matching apps with id (objectId), appId, displayName.
+        """
+        result = await self._get(
+            "applications",
+            params={
+                "$search":  f'"displayName:{query}"',
+                "$select":  "id,appId,displayName",
+                "$top":     "10",
+                "$orderby": "displayName",
+            },
+        )
+        return result.get("value", [])
+
     async def get_service_principal_by_app_id(self, app_id: str) -> dict | None:
         """
         GET /servicePrincipals?$filter=appId eq '{app_id}'
@@ -692,7 +741,7 @@ class GraphClient:
                 "$search":  f'"displayName:{query}" OR "userPrincipalName:{query}"',
                 "$select":  "id,displayName,userPrincipalName",
                 "$top":     "15",
-                # "$orderby": "displayName",
+                "$orderby": "displayName",
             },
         )
         return result.get("value", [])
@@ -759,6 +808,22 @@ class GraphClient:
             {"@odata.id": f"https://graph.microsoft.com/v1.0/directoryObjects/{manager_id}"},
         )
 
+    async def tag_as_enterprise_app(self, sp_id: str) -> None:
+        """
+        PATCH /servicePrincipals/{id}
+        Adds the WindowsAzureActiveDirectoryIntegratedApp tag to an existing
+        service principal so it appears in the Enterprise Applications blade.
+
+        Use this to fix service principals created without the correct tags.
+        """
+        logger.info("Tagging SP %s as enterprise app...", sp_id)
+        await self._patch(
+            f"servicePrincipals/{sp_id}",
+            {"tags": ["WindowsAzureActiveDirectoryIntegratedApp"]},
+        )
+        logger.info("SP %s tagged as enterprise app successfully.", sp_id)
+        
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -767,6 +832,7 @@ def _cert_expiry_date() -> str:
     from datetime import datetime, timezone, timedelta
     expiry = datetime.now(timezone.utc) + timedelta(days=3 * 365)
     return expiry.strftime("%Y-%m-%dT%H:%M:%SZ")
+
 
 # ── License name helpers ──────────────────────────────────────────────────────
 
@@ -851,5 +917,4 @@ _FRIENDLY_NAME_TO_SKU: dict[str, str] = {
     "MICROSOFT TEAMS EXPLORATORY":            "TEAMS_EXPLORATORY",
     "MICROSOFT TEAMS ROOMS PRO":              "MTR_PREM",
 }
-
 
