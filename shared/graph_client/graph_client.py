@@ -523,7 +523,7 @@ class GraphClient:
             "groups",
             params={
                 "$select": "id,displayName",
-                "$orderby": "displayName",
+                # "$orderby": "displayName",
                 "$top": "999",
             },
         )
@@ -688,7 +688,7 @@ class GraphClient:
                 "$search":  f'"displayName:{query}" OR "userPrincipalName:{query}"',
                 "$select":  "id,displayName,userPrincipalName",
                 "$top":     "10",
-                "$orderby": "displayName",
+                # "$orderby": "displayName",
             },
         )
         return result.get("value", [])
@@ -705,7 +705,7 @@ class GraphClient:
                 "$search":  f'"displayName:{query}"',
                 "$select":  "id,appId,displayName",
                 "$top":     "10",
-                "$orderby": "displayName",
+                # "$orderby": "displayName",
             },
         )
         return result.get("value", [])
@@ -741,7 +741,7 @@ class GraphClient:
                 "$search":  f'"displayName:{query}" OR "userPrincipalName:{query}"',
                 "$select":  "id,displayName,userPrincipalName",
                 "$top":     "15",
-                "$orderby": "displayName",
+                # "$orderby": "displayName",
             },
         )
         return result.get("value", [])
