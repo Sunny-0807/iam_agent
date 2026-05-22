@@ -17,11 +17,11 @@ from ai_engine.conversation_memory import ConversationMemory
 from shared.models import AssistantAction
 
 st.set_page_config(
-    page_title="AI Assistant — Agentic IAM", page_icon="🤖", layout="wide"
+    page_title="Action AI Agent — Agentic IAM", page_icon="🤖", layout="wide"
 )
 
 # ── Page header ───────────────────────────────────────────────────────────────
-st.title("🤖 AI Assistant")
+st.title("🤖 Action AI Agent")
 st.caption(
     "Natural language IAM management. Remembers context across turns — "
     "say 'add him to DevOps group' after onboarding a user and it knows who 'him' is."

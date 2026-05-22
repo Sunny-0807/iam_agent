@@ -1,7 +1,7 @@
 import json
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
@@ -11,11 +11,8 @@ st.set_page_config(page_title="Dashboard — Agentic IAM", page_icon="📊", lay
 st.title("📊 Dashboard")
 
 
-# ── Load audit log ────────────────────────────────────────────────────────────
-
 @st.cache_data(ttl=30)
-def load_audit_entries() -> list[dict]:
-    """Load all entries from local audit.jsonl file."""
+def load_entries() -> list[dict]:
     log_path = Path(__file__).resolve().parent.parent.parent / "audit.jsonl"
     if not log_path.exists():
         return []
@@ -28,69 +25,100 @@ def load_audit_entries() -> list[dict]:
                     entries.append(json.loads(line))
                 except json.JSONDecodeError:
                     continue
-    # Sort newest first
     entries.sort(key=lambda e: e.get("timestamp", ""), reverse=True)
     return entries
 
 
-entries = load_audit_entries()
+entries = load_entries()
 
 # ── Summary cards ─────────────────────────────────────────────────────────────
-st.subheader("Overview")
-
-total        = len(entries)
-completed    = sum(1 for e in entries if e.get("status") == "completed")
-failed       = sum(1 for e in entries if e.get("status") == "failed")
-escalated    = sum(1 for e in entries if e.get("status") == "escalated")
-
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total Actions",       total)
-col2.metric("Completed",           completed, delta=None)
-col3.metric("Failed",              failed,    delta=None)
-col4.metric("Pending Approvals",   escalated, delta=None)
+col1, col2, col3, col4, col5 = st.columns(5)
+col1.metric("Total Actions",   len(entries))
+col2.metric("Completed",       sum(1 for e in entries if e.get("status") == "completed"))
+col3.metric("Failed",          sum(1 for e in entries if e.get("status") == "failed"))
+col4.metric("Pending Approval",sum(1 for e in entries if e.get("status") == "escalated"))
+col5.metric("AI Assistant",    sum(1 for e in entries if e.get("requested_by") == "ai_assistant"))
 
 st.divider()
 
-# ── Flow breakdown ────────────────────────────────────────────────────────────
-st.subheader("Actions by flow")
+# ── Pending approvals ─────────────────────────────────────────────────────────
+escalated = [e for e in entries if e.get("status") == "escalated"]
+if escalated:
+    st.subheader(f"⏳ Pending Approvals ({len(escalated)})")
+    st.caption("These flows are waiting for admin approval. Use SKIP_APPROVAL=true for local testing, or build the approval callback in Phase 4.")
+    for e in escalated[:5]:
+        flow      = e.get("flow_name", "").replace("_", " ").title()
+        principal = e.get("principal_id", "")[:36]
+        ts        = e.get("timestamp", "")[:19].replace("T", " ")
+        requested = e.get("requested_by", "")
+        with st.container(border=True):
+            c1, c2, c3 = st.columns([2, 3, 3])
+            c1.write(f"**{flow}**")
+            c2.caption(f"`{principal}`")
+            c3.caption(f"{ts} — {requested}")
+    if len(escalated) > 5:
+        st.caption(f"... and {len(escalated) - 5} more. See Audit Log for full list.")
+    st.divider()
 
-flow_counts = {}
+# ── Actions by bot ────────────────────────────────────────────────────────────
+st.subheader("Actions by bot")
+
+BOT_META = {
+    "user_bot":     {"icon": "👤", "label": "User Bot",      "desc": "Onboarding, offboarding, isolation"},
+    "app_bot":      {"icon": "🖥️", "label": "App Bot",       "desc": "SAML app registration, decommission"},
+    "ai_assistant": {"icon": "🤖", "label": "Action AI Agent","desc": "Natural language IAM actions"},
+}
+
+# Derive bot from bot_type field; fall back to requested_by for AI assistant entries
+def _bot_key(e: dict) -> str:
+    bt = e.get("bot_type", "")
+    if bt in BOT_META:
+        return bt
+    if e.get("requested_by") == "ai_assistant":
+        return "ai_assistant"
+    return bt or "unknown"
+
+bot_counts: dict[str, int] = {}
 for e in entries:
-    flow = e.get("flow_name", "unknown")
-    flow_counts[flow] = flow_counts.get(flow, 0) + 1
+    key = _bot_key(e)
+    bot_counts[key] = bot_counts.get(key, 0) + 1
 
-if flow_counts:
-    cols = st.columns(len(flow_counts))
-    for col, (flow, count) in zip(cols, flow_counts.items()):
-        col.metric(flow.replace("_", " ").title(), count)
+if bot_counts:
+    # Show known bots in fixed order, then any unknowns
+    ordered = [k for k in BOT_META if k in bot_counts]
+    ordered += [k for k in bot_counts if k not in BOT_META]
+    cols = st.columns(len(ordered))
+    for col, key in zip(cols, ordered):
+        meta  = BOT_META.get(key, {"icon": "•", "label": key, "desc": ""})
+        count = bot_counts[key]
+        col.metric(f"{meta['icon']} {meta['label']}", count)
+        col.caption(meta["desc"])
 else:
-    st.info("No audit entries yet. Run some flows to see activity here.")
+    st.info("No activity recorded yet.")
 
 st.divider()
 
 # ── Recent activity ───────────────────────────────────────────────────────────
 st.subheader("Recent activity")
-
 if not entries:
-    st.info("No activity recorded yet.")
+    st.info("No audit entries yet.")
 else:
-    recent = entries[:20]
-    for e in recent:
+    for e in entries[:15]:
         status = e.get("status", "")
-        flow   = e.get("flow_name", "").replace("_", " ").title()
-        pid    = e.get("principal_id", "")[:20]
-        ts     = e.get("timestamp", "")[:19].replace("T", " ")
-        by     = e.get("requested_by", "")
-
-        icon = {"completed": "✅", "failed": "❌", "escalated": "⏳"}.get(status, "•")
-
-        with st.container():
-            c1, c2, c3, c4 = st.columns([1, 3, 3, 3])
-            c1.write(icon)
-            c2.write(f"**{flow}**")
-            c3.write(f"`{pid}`")
-            c4.write(f"{ts} — {by}")
+        icon   = {"completed": "✅", "failed": "❌", "escalated": "⏳"}.get(status, "•")
+        details = e.get("details", {})
+        action  = details.get("assistant_action") or e.get("flow_name", "")
+        action  = action.replace("_", " ").title()
+        pid     = (e.get("principal_id") or "")[:28]
+        ts      = e.get("timestamp", "")[:19].replace("T", " ")
+        src     = e.get("requested_by", "")
+        c1, c2, c3, c4 = st.columns([1, 3, 3, 3])
+        c1.write(icon)
+        c2.write(f"**{action}**")
+        c3.write(f"`{pid}`")
+        c4.caption(f"{ts} — {src}")
 
     if st.button("🔄 Refresh"):
         st.cache_data.clear()
         st.rerun()
+

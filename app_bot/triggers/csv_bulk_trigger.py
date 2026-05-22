@@ -146,3 +146,61 @@ def _log_summary(results: list[BulkAppOnboardingResult]) -> None:
         if r.status == "failed":
             logger.error("  FAILED row=%d name='%s' error=%s", r.row, r.display_name, r.error)
 
+
+async def preflight_validate(rows: list[dict]) -> tuple[list, list[str]]:
+    """
+    Pre-flight validation for app CSV rows.
+    Returns (issues, missing_columns).
+    """
+    from shared.models import BulkUserPreflightIssue as Issue
+    issues: list = []
+
+    if not rows:
+        return [], []
+
+    required = {"display_name", "app_type", "entity_id", "reply_url", "owner_upn"}
+    headers  = set(rows[0].keys())
+    missing  = sorted(required - headers)
+    if missing:
+        return [], missing
+
+    seen_names: set[str] = set()
+    for i, row in enumerate(rows, start=1):
+        name = _safe(row.get("display_name"))
+        upn  = _safe(row.get("owner_upn")) or f"row-{i}"
+
+        for col in required:
+            if not _safe(row.get(col)):
+                issues.append(Issue(row=i, upn=upn, severity="error",
+                                    message=f"Required field '{col}' is missing or empty."))
+
+        app_type = _safe(row.get("app_type")).lower()
+        if app_type not in ("gallery", "non_gallery"):
+            issues.append(Issue(row=i, upn=upn, severity="error",
+                                message=f"app_type must be 'gallery' or 'non_gallery', got '{app_type}'."))
+
+        if app_type == "gallery" and not _safe(row.get("template_id")):
+            issues.append(Issue(row=i, upn=upn, severity="error",
+                                message="template_id is required for gallery apps."))
+
+        reply = _safe(row.get("reply_url"))
+        if reply and not reply.startswith("https://"):
+            issues.append(Issue(row=i, upn=upn, severity="error",
+                                message=f"reply_url must start with https://, got '{reply}'."))
+
+        if name and name.lower() in seen_names:
+            issues.append(Issue(row=i, upn=upn, severity="error",
+                                message=f"Duplicate display_name '{name}' in CSV."))
+        if name:
+            seen_names.add(name.lower())
+
+    return issues, []
+
+
+async def resolve_and_prepare(rows: list[dict]) -> list[dict]:
+    """
+    For app pipeline — rows are already dicts, just ensure safe values.
+    Group resolution and owner resolution happen inside saml_app_onboarding.
+    """
+    return [{_safe(k): _safe(v) for k, v in row.items()} for row in rows]
+

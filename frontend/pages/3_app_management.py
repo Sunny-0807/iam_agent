@@ -1,4 +1,11 @@
+"""
+Page 3 — Application Management
+Tabs: Onboarding Pipeline (4 agents) | Decommission App
+"""
 import asyncio
+import csv
+import io
+import os
 import re
 import sys
 from pathlib import Path
@@ -7,356 +14,382 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import streamlit as st
 from shared.graph_client import GraphClient
+from shared.config import config
 
-st.set_page_config(
-    page_title="App Management — Agentic IAM", page_icon="️", layout="wide"
-)
-st.title("️ App Management")
+st.set_page_config(page_title="Application Management — Agentic IAM", page_icon="🖥️", layout="wide")
+st.title("🖥️ Application Management")
 
 client = GraphClient()
 
+PROJECT_ROOT  = Path(__file__).resolve().parent.parent.parent
+APP_INBOX     = Path(os.getenv("APP_WATCHER_INBOX", str(PROJECT_ROOT / "watched_apps_inbox")))
+APP_INBOX.mkdir(parents=True, exist_ok=True)
 
-# ── Cached resolvers ──────────────────────────────────────────────────────────
 
 @st.cache_data(ttl=300, show_spinner="Loading groups...")
-def fetch_groups() -> list[dict]:
+def fetch_groups():
     return asyncio.run(client.list_groups())
 
 
-def resolve_group_ids(names: list[str], all_groups: list[dict]) -> list[str]:
-    m = {g["displayName"]: g["id"] for g in all_groups}
-    return [m[n] for n in names if n in m]
+def _valid_https(url):
+    return bool(re.match(r"^https://[a-zA-Z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+$", url or ""))
 
 
-# ── Validation helpers ────────────────────────────────────────────────────────
-
-def _is_valid_https_url(url: str) -> bool:
-    return bool(re.match(r"^https://[a-zA-Z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+$", url))
+def _valid_entity(eid):
+    return (eid or "").startswith(("https://", "urn:"))
 
 
-def _is_valid_entity_id(entity_id: str) -> bool:
-    return entity_id.startswith("https://") or entity_id.startswith("urn:")
+tab_pipeline, tab_decom = st.tabs(["🔄 Onboarding Pipeline", "➖ Decommission App"])
 
 
-def validate_saml_form(
-    display_name, app_type, template_id,
-    entity_id, reply_url, sign_on_url, owner_upn,
-) -> list[str]:
-    errors = []
-    if not display_name.strip():
-        errors.append("Display name is required.")
-    if app_type == "gallery" and not template_id.strip():
-        errors.append("Template ID is required for gallery apps.")
-    if not entity_id.strip():
-        errors.append("Entity ID is required.")
-    elif not _is_valid_entity_id(entity_id.strip()):
-        errors.append("Entity ID must start with 'https://' or 'urn:'.")
-    if not reply_url.strip():
-        errors.append("Reply URL (ACS URL) is required.")
-    elif not _is_valid_https_url(reply_url.strip()):
-        errors.append("Reply URL must be a valid HTTPS URL.")
-    if sign_on_url.strip() and not _is_valid_https_url(sign_on_url.strip()):
-        errors.append("Sign-on URL must be a valid HTTPS URL if provided.")
-    if not owner_upn.strip():
-        errors.append("Owner is required.")
-    return errors
+# ══════════════════════════════════════════════════════════════════════════════
+# TAB 1 — ONBOARDING PIPELINE
+# ══════════════════════════════════════════════════════════════════════════════
+with tab_pipeline:
+    st.subheader("Application Onboarding Pipeline")
 
+    from ai_engine.agent_pipeline import (
+        PipelineState, PipelineType, PipelineMode, AgentStatus,
+        run_collection_agent, run_analysis_agent,
+        run_decision_agent, run_execution_agent,
+    )
 
-# ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2 = st.tabs(["➕ Register SAML App", "➖ Decommission App"])
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# TAB 1 — Register SAML App (Flow D)
-# ════════════════════════════════════════════════════════════════════════════
-with tab1:
-    st.subheader("Register a new SAML SSO application")
-
-    # ── Basic info ────────────────────────────────────────────────────────────
-    display_name = st.text_input("Display name *", placeholder="Salesforce CRM")
-
-    app_type = st.radio(
-        "App type *",
-        options=["non_gallery", "gallery"],
+    mode_label = st.radio(
+        "Pipeline mode",
+        options=["stepwise", "auto"],
         format_func=lambda x: (
-            "Non-gallery (custom app)"
-            if x == "non_gallery"
-            else "Gallery (Microsoft app catalog)"
+            "🔢 Step-by-step (manually advance each agent)"
+            if x == "stepwise"
+            else "⚡ Auto-run (all agents run automatically)"
         ),
         horizontal=True,
+        key="app_pipeline_mode",
     )
+    pipeline_mode = PipelineMode.AUTO if mode_label == "auto" else PipelineMode.STEPWISE
 
-    template_id = ""
-    if app_type == "gallery":
-        template_id = st.text_input(
-            "Template ID *",
-            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-            help="Find in Azure Portal → Entra ID → Enterprise apps → search app → Properties → Application template ID",
-        )
-    else:
-        st.info(
-            "Non-gallery app — no template ID needed. "
-            "Microsoft's standard non-gallery SAML template will be used automatically.",
-            icon="ℹ️",
-        )
+    st.divider()
 
-    # ── SAML URLs ─────────────────────────────────────────────────────────────
-    st.markdown("**SAML Configuration**")
-    entity_id   = st.text_input(
-        "Entity ID *",
-        placeholder="https://saml.salesforce.com",
-        help="SAML Identifier URI — must start with https:// or urn:",
-    )
-    reply_url   = st.text_input(
-        "Reply URL — ACS URL *",
-        placeholder="https://saml.salesforce.com/sso/saml",
-        help="Assertion Consumer Service URL — must be HTTPS.",
-    )
-    sign_on_url = st.text_input(
-        "Sign-on URL (optional)",
-        placeholder="https://salesforce.com/login",
-        help="For SP-initiated SSO. Leave blank for IdP-initiated.",
-    )
+    # ── Source ────────────────────────────────────────────────────────────────
+    src_form, src_csv, src_folder = st.tabs(["📝 Single App Form", "📤 Upload CSV", "📁 Inbox Folder"])
+    csv_content = csv_filename = None
 
-    # ── Owner — user search ───────────────────────────────────────────────────
-    st.markdown("**Owner**")
-    st.caption("Search for the user who will own this application registration.")
+    with src_form:
+        with st.form("single_app_form"):
+            c1, c2 = st.columns(2)
+            s_name = c1.text_input("Display name *", placeholder="My SAML App")
+            s_type = c2.radio("App type *", ["non_gallery", "gallery"], horizontal=True,
+                              format_func=lambda x: "Non-gallery" if x=="non_gallery" else "Gallery")
+            s_tid  = st.text_input("Template ID (gallery only)") if s_type == "gallery" else ""
+            s_eid  = st.text_input("Entity ID *", placeholder="https://saml.example.com")
+            s_aurl = st.text_input("Reply URL (ACS) *", placeholder="https://saml.example.com/sso")
+            s_surl = st.text_input("Sign-on URL (optional)")
+            s_owner_upn = st.text_input("Owner UPN *", placeholder="admin@company.com")
+            all_grps    = fetch_groups()
+            s_grp_names = st.multiselect("Assigned groups", [g["displayName"] for g in all_grps])
+            form_sub    = st.form_submit_button("Build pipeline from form →", type="primary")
 
-    owner_query = st.text_input(
-        "Search owner by name or UPN",
-        placeholder="Type a name or email...",
-        key="reg_owner_query",
-    )
-
-    owner_upn  = ""
-    owner_name = ""
-
-    if owner_query and len(owner_query.strip()) >= 2:
-        if st.button(" Search users", key="reg_owner_search"):
-            with st.spinner("Searching..."):
-                try:
-                    users = asyncio.run(client.search_users(owner_query.strip()))
-                    st.session_state["reg_owner_results"] = users
-                except Exception as exc:
-                    st.error(f"User search failed: {exc}")
-                    st.session_state["reg_owner_results"] = []
-
-    if "reg_owner_results" in st.session_state:
-        results = st.session_state["reg_owner_results"]
-        if not results:
-            st.warning("No users found. Try a different search term.")
-        else:
-            options = {
-                f"{u['displayName']} ({u['userPrincipalName']})": u
-                for u in results
-            }
-            sel_label = st.selectbox(
-                "Select owner *",
-                options=["(select)"] + list(options.keys()),
-                key="reg_owner_sel",
-            )
-            if sel_label != "(select)":
-                selected_user = options[sel_label]
-                owner_upn     = selected_user["userPrincipalName"]
-                owner_name    = selected_user["displayName"]
-                st.success(
-                    f"✅ Owner: **{owner_name}** — `{owner_upn}`"
+        if form_sub:
+            errs = []
+            if not s_name:                            errs.append("Display name required.")
+            if s_type == "gallery" and not s_tid:     errs.append("Template ID required for gallery.")
+            if not _valid_entity(s_eid):              errs.append("Valid Entity ID required (https:// or urn:).")
+            if not _valid_https(s_aurl):              errs.append("Valid HTTPS Reply URL required.")
+            if not s_owner_upn:                       errs.append("Owner UPN required.")
+            for e in errs: st.error(e)
+            if not errs:
+                grp_str  = "|".join(s_grp_names)
+                csv_content  = (
+                    "display_name,app_type,template_id,entity_id,reply_url,"
+                    "sign_on_url,owner_upn,assigned_group_names\n"
+                    f"{s_name},{s_type},{s_tid},{s_eid},{s_aurl},{s_surl},{s_owner_upn},{grp_str}"
                 )
+                csv_filename = f"{s_name.replace(' ','_')}_pipeline.csv"
+                st.success(f"✅ **{s_name}** ready for pipeline.")
 
-    # ── Assigned groups — multiselect dropdown ────────────────────────────────
-    st.markdown("**Access — assigned groups** (optional)")
-    st.caption("Users in these groups will have SSO access to this app.")
+    with src_csv:
+        with st.expander("📄 CSV format", expanded=False):
+            st.markdown("""
+| Column | Required |
+|---|---|
+| `display_name` | ✅ |
+| `app_type` | ✅ `gallery` or `non_gallery` |
+| `entity_id` | ✅ https:// or urn: |
+| `reply_url` | ✅ HTTPS |
+| `owner_upn` | ✅ |
+| `template_id` | gallery only |
+| `sign_on_url` | optional |
+| `assigned_group_names` | optional, pipe-separated |
+            """)
+        uploaded = st.file_uploader("Upload app CSV", type=["csv"], key="app_csv_upload")
+        if uploaded:
+            csv_content  = uploaded.read().decode("utf-8")
+            csv_filename = uploaded.name
+            st.success(f"✅ {csv_filename} loaded.")
 
-    try:
-        all_groups = fetch_groups()
-        selected_group_names = st.multiselect(
-            "Select groups",
-            options=[g["displayName"] for g in all_groups],
-            key="reg_groups",
+    with src_folder:
+        st.info(
+            f"Inbox: `{APP_INBOX}`\n\n"
+            "For automated processing:\n```\npython app_bot/triggers/app_folder_watcher.py\n```",
+            icon="📁",
         )
-    except Exception as e:
-        st.error(f"Could not load groups: {e}")
-        selected_group_names, all_groups = [], []
+        inbox_files = sorted(APP_INBOX.glob("*.csv"))
+        if inbox_files:
+            sel = st.selectbox("Pick inbox file:", ["(select)"]+[f.name for f in inbox_files], key="app_inbox_sel")
+            if sel != "(select)":
+                csv_content  = (APP_INBOX / sel).read_text(encoding="utf-8")
+                csv_filename = sel
+                st.success(f"✅ {sel} selected.")
 
-    # ── Submit ────────────────────────────────────────────────────────────────
+    if not csv_content:
+        st.info("Fill the form, upload a CSV, or select an inbox file to start the pipeline.", icon="⬆️")
+        st.stop()
+
+    # ── PipelineState ─────────────────────────────────────────────────────────
+    PS_KEY = "app_ps"
+    FN_KEY = "app_ps_file"
+    if PS_KEY not in st.session_state or st.session_state.get(FN_KEY) != csv_filename:
+        st.session_state[PS_KEY] = PipelineState(
+            pipeline_type=PipelineType.APP,
+            mode=pipeline_mode,
+        )
+        st.session_state[FN_KEY] = csv_filename
+
+    ps: PipelineState = st.session_state[PS_KEY]
+    ps.mode = pipeline_mode
+
+    # Status bar
+    def _icon(s: AgentStatus) -> str:
+        return {"idle":"⬜","running":"⏳","done":"✅","failed":"❌","waiting":"⚠️"}.get(s.value,"⬜")
+
+    c1,c2,c3,c4 = st.columns(4)
+    c1.write(f"{_icon(ps.collection_status)} **Agent 1** — Collection")
+    c2.write(f"{_icon(ps.analysis_status)}   **Agent 2** — Analysis")
+    c3.write(f"{_icon(ps.decision_status)}   **Agent 3** — Decision")
+    c4.write(f"{_icon(ps.execution_status)}  **Agent 4** — Execution")
     st.divider()
-    if st.button(" Register App", type="primary", key="reg_submit"):
-        errors = validate_saml_form(
-            display_name, app_type, template_id,
-            entity_id, reply_url, sign_on_url, owner_upn,
-        )
-        if errors:
-            for err in errors:
-                st.error(err)
-        else:
-            from app_bot.flows.saml_app_onboarding import run_saml_app_onboarding
-            from shared.models import AppType, SAMLAppOnboardingRequest
 
-            request = SAMLAppOnboardingRequest(
-                display_name=display_name.strip(),
-                app_type=AppType(app_type),
-                template_id=template_id.strip() or None,
-                entity_id=entity_id.strip(),
-                reply_url=reply_url.strip(),
-                sign_on_url=sign_on_url.strip() or None,
-                owner_upn=owner_upn,
-                assigned_group_names=selected_group_names,  # names resolved inside flow
-                requested_by="streamlit_admin",
-                source="admin_portal",
-            )
+    if ps.error:
+        st.error(f"❌ {ps.error}")
+        if st.button("🔄 Reset", key="app_reset_err"):
+            del st.session_state[PS_KEY]; st.rerun()
+        st.stop()
 
-            with st.spinner("Registering SAML application... (this may take up to 30s for Entra ID propagation)"):
-                try:
-                    result = asyncio.run(run_saml_app_onboarding(request))
-                    st.success("✅ Application registered successfully!")
-                    st.json({
-                        "app_id":               result.get("app_id"),
-                        "object_id":            result.get("object_id"),
-                        "service_principal_id": result.get("service_principal_id"),
-                        "cert_thumbprint":      result.get("cert_thumbprint"),
-                        "cert_expiry":          result.get("cert_expiry"),
-                        "groups_assigned":      result.get("groups_assigned"),
-                    })
-                    st.info(
-                        "Next step: share the Federation Metadata URL with the "
-                        "application team for SP-side configuration.",
-                        icon="ℹ️",
-                    )
-                    # Clear owner search state after success
-                    st.session_state.pop("reg_owner_results", None)
-                except Exception as exc:
-                    st.error(f"Registration failed: {exc}")
+    # ── Agent 1 ───────────────────────────────────────────────────────────────
+    st.markdown("### 📥 Agent 1 — Collection")
+    if ps.collection_status == AgentStatus.IDLE:
+        if st.button("▶ Run Collection Agent", type="primary", key="app_coll_btn"):
+            with st.spinner("Collecting..."):
+                asyncio.run(run_collection_agent(ps, "csv_upload", csv_content, csv_filename))
+                st.session_state[PS_KEY] = ps
+            st.rerun()
+
+    if ps.collection_status == AgentStatus.DONE and ps.collection:
+        st.success(f"✅ {ps.collection.row_count} row(s) from `{ps.collection.filename}`")
+        with st.expander("Preview", expanded=False):
+            st.dataframe(ps.collection.rows[:5], use_container_width=True, hide_index=True)
+        if ps.mode == PipelineMode.AUTO and ps.analysis_status == AgentStatus.IDLE:
+            with st.spinner("Auto-running Analysis Agent..."):
+                asyncio.run(run_analysis_agent(ps)); st.session_state[PS_KEY] = ps
+            st.rerun()
+
+    st.divider()
+
+    # ── Agent 2 ───────────────────────────────────────────────────────────────
+    st.markdown("### 🔍 Agent 2 — Analysis")
+    if ps.collection_status == AgentStatus.DONE and ps.analysis_status == AgentStatus.IDLE:
+        if ps.mode == PipelineMode.STEPWISE:
+            if st.button("▶ Run Analysis Agent", type="primary", key="app_anal_btn"):
+                with st.spinner("Validating..."):
+                    asyncio.run(run_analysis_agent(ps)); st.session_state[PS_KEY] = ps
+                st.rerun()
+
+    if ps.analysis_status == AgentStatus.DONE and ps.analysis:
+        a = ps.analysis
+        if a.missing_columns:
+            st.error(f"❌ Missing columns: {a.missing_columns}"); st.stop()
+        col1,col2,col3 = st.columns(3)
+        col1.metric("Total",    ps.collection.row_count)
+        col2.metric("🔴 Errors",   len(a.error_rows))
+        col3.metric("🟡 Warnings", len(a.warning_rows))
+        if a.issues:
+            st.dataframe([
+                {"Row":i.row,"Identifier":i.upn,
+                 "Severity":"🔴 Error" if i.severity=="error" else "🟡 Warning","Message":i.message}
+                for i in a.issues
+            ], use_container_width=True, hide_index=True)
+        if not a.has_errors: st.success("✅ All rows passed validation.")
+        if ps.mode == PipelineMode.AUTO and ps.decision_status == AgentStatus.IDLE:
+            with st.spinner("Auto-running Decision Agent..."):
+                asyncio.run(run_decision_agent(ps)); st.session_state[PS_KEY] = ps
+            st.rerun()
+
+    st.divider()
+
+    # ── Agent 3 ───────────────────────────────────────────────────────────────
+    st.markdown("### ⚖️ Agent 3 — Decision")
+    if ps.analysis_status == AgentStatus.DONE and ps.decision_status == AgentStatus.IDLE:
+        if ps.mode == PipelineMode.STEPWISE:
+            if st.button("▶ Run Decision Agent", type="primary", key="app_dec_btn"):
+                with st.spinner("Evaluating policies..."):
+                    asyncio.run(run_decision_agent(ps)); st.session_state[PS_KEY] = ps
+                st.rerun()
+
+    if ps.decision_status in (AgentStatus.DONE, AgentStatus.WAITING) and ps.decision:
+        d = ps.decision
+        col1,col2 = st.columns(2)
+        col1.metric("✅ Auto-approved",  len(d.auto_rows))
+        col2.metric("⚠ Needs approval", len(d.approval_rows))
+
+        if d.auto_rows:
+            with st.expander(f"✅ Auto-approved ({len(d.auto_rows)})", expanded=False):
+                for r in d.auto_rows:
+                    st.write(f"Row {r.row_num} — **{r.display_name}**")
+
+        if d.approval_rows:
+            st.warning(f"⚠️ {len(d.approval_rows)} row(s) require approval:", icon="⚠️")
+            newly = []
+            for r in d.approval_rows:
+                already = r.row_num in d.approved_by_admin
+                checked = st.checkbox(
+                    f"**Row {r.row_num} — {r.display_name}**  \n_{r.reason}_",
+                    value=already, key=f"app_approve_{r.row_num}",
+                )
+                if checked: newly.append(r.row_num)
+            if st.button("💾 Save approvals", key="app_save_approvals"):
+                d.approved_by_admin  = newly
+                ps.decision_status   = AgentStatus.DONE
+                st.session_state[PS_KEY] = ps
+                st.success(f"✅ {len(newly)} row(s) approved."); st.rerun()
+
+        if (ps.decision_status == AgentStatus.DONE
+                and ps.execution_status == AgentStatus.IDLE
+                and ps.mode == PipelineMode.AUTO
+                and not d.approval_rows):
+            with st.spinner("Auto-running Execution Agent..."):
+                asyncio.run(run_execution_agent(ps)); st.session_state[PS_KEY] = ps
+            st.rerun()
+
+    st.divider()
+
+    # ── Agent 4 ───────────────────────────────────────────────────────────────
+    st.markdown("### ⚡ Agent 4 — Execution")
+
+    approved_total = 0
+    if ps.decision and ps.decision_status == AgentStatus.DONE:
+        approved_total = len(ps.decision.auto_rows) + len(ps.decision.approved_by_admin)
+
+    if ps.decision_status == AgentStatus.DONE and ps.execution_status == AgentStatus.IDLE:
+        if approved_total == 0:
+            st.info("No rows approved — nothing to execute.")
+        elif ps.mode == PipelineMode.STEPWISE:
+            if st.button(f"▶ Run Execution Agent ({approved_total} row(s))", type="primary", key="app_exec_btn"):
+                with st.spinner("Executing... (SAML app registration takes 20-60s per app)"):
+                    asyncio.run(run_execution_agent(ps)); st.session_state[PS_KEY] = ps
+                st.rerun()
+
+    if ps.execution_status == AgentStatus.DONE and ps.execution:
+        e       = ps.execution
+        results = e.summary or []
+        passed  = sum(1 for r in results if r.status=="completed")
+        failed  = sum(1 for r in results if r.status=="failed")
+        if failed == 0: st.success(f"✅ All {passed} app(s) registered in {e.total_duration:.1f}s.")
+        else:           st.warning(f"✅ {passed} done  ❌ {failed} failed — {e.total_duration:.1f}s")
+
+        st.dataframe([
+            {"App": r.display_name,
+             "Status": "✅ done" if r.status=="completed" else "❌ failed",
+             "App ID": r.app_id or "",
+             "Cert Thumbprint": r.cert_thumbprint or "",
+             "Duration": f"{r.duration_seconds:.1f}s",
+             "Error": r.error or ""}
+            for r in results
+        ], use_container_width=True, hide_index=True)
+
+        out = io.StringIO()
+        w   = csv.DictWriter(out, fieldnames=["display_name","status","app_id","cert_thumbprint","duration_seconds","error"])
+        w.writeheader()
+        for r in results:
+            w.writerow({"display_name":r.display_name,"status":r.status,"app_id":r.app_id or "",
+                        "cert_thumbprint":r.cert_thumbprint or "","duration_seconds":r.duration_seconds,"error":r.error or ""})
+        st.download_button("⬇️ Download results", out.getvalue(), "app_results.csv", "text/csv")
+        st.divider()
+        if st.button("🔄 New pipeline", key="app_pipeline_reset"):
+            del st.session_state[PS_KEY]; st.session_state.pop(FN_KEY,None); st.rerun()
+
+    elif ps.execution_status == AgentStatus.FAILED:
+        st.error(f"❌ Execution failed: {ps.error}")
+        if st.button("🔄 Reset", key="app_exec_reset"):
+            del st.session_state[PS_KEY]; st.rerun()
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# TAB 2 — Decommission App (Flow E)
-# ════════════════════════════════════════════════════════════════════════════
-with tab2:
+# ══════════════════════════════════════════════════════════════════════════════
+# TAB 2 — DECOMMISSION
+# ══════════════════════════════════════════════════════════════════════════════
+with tab_decom:
     st.subheader("Decommission an application")
-    st.warning(
-        "This permanently deletes the app registration and service principal. "
-        "All user SSO access will be removed.",
-        icon="⚠️",
-    )
+    st.warning("Permanently deletes the app registration and service principal.", icon="⚠️")
 
-    # ── App search — resolves all 3 IDs automatically ─────────────────────────
-    st.markdown("**Find application**")
-    st.caption(
-        "Search by display name. All required IDs are resolved automatically."
-    )
+    app_q = st.text_input("Search app by display name", key="decom_search")
+    if app_q and st.button("🔍 Search", key="decom_search_btn"):
+        with st.spinner("Searching..."):
+            try:
+                apps = asyncio.run(client.search_applications(app_q))
+                st.session_state["decom_apps"] = apps
+                for k in ["decom_sel_app","decom_sel_sp"]: st.session_state.pop(k,None)
+            except Exception as exc:
+                st.error(f"Search failed: {exc}")
 
-    app_query = st.text_input(
-        "Search application by name",
-        placeholder="Type the app display name...",
-        key="decom_app_query",
-    )
-
-    # State for resolved app
-    decom_app_id  = ""
-    decom_obj_id  = ""
-    decom_sp_id   = ""
-    decom_name    = ""
-
-    if app_query and len(app_query.strip()) >= 2:
-        if st.button(" Search apps", key="decom_app_search"):
-            with st.spinner("Searching applications..."):
-                try:
-                    apps = asyncio.run(client.search_applications(app_query.strip()))
-                    st.session_state["decom_app_results"] = apps
-                except Exception as exc:
-                    st.error(f"App search failed: {exc}")
-                    st.session_state["decom_app_results"] = []
-
-    if "decom_app_results" in st.session_state:
-        results = st.session_state["decom_app_results"]
-        if not results:
-            st.warning("No applications found. Try a different search term.")
+    if "decom_apps" in st.session_state:
+        apps = st.session_state["decom_apps"]
+        if not apps:
+            st.warning("No apps found.")
         else:
-            options = {
-                f"{a['display_name']} (appId: ...{a['app_id'][-6:]})": a
-                for a in results
-            }
-            sel_label = st.selectbox(
-                "Select application *",
-                options=["(select)"] + list(options.keys()),
-                key="decom_app_sel",
-            )
-            if sel_label != "(select)":
-                selected_app = options[sel_label]
-                decom_app_id  = selected_app["app_id"]
-                decom_obj_id  = selected_app["object_id"]
-                decom_sp_id   = selected_app["service_principal_id"]
-                decom_name    = selected_app["display_name"]
+            opts = {a["displayName"]: a for a in apps}
+            sel  = st.selectbox("Select app *", ["(select)"]+list(opts.keys()), key="decom_app_sel")
+            if sel != "(select)":
+                app = opts[sel]
+                if st.session_state.get("decom_sel_app",{}).get("appId") != app["appId"]:
+                    with st.spinner("Resolving SP..."):
+                        try:
+                            sp = asyncio.run(client.get_service_principal_by_app_id(app["appId"]))
+                            st.session_state["decom_sel_app"] = app
+                            st.session_state["decom_sel_sp"]  = sp
+                        except Exception as exc:
+                            st.error(f"SP not found: {exc}")
 
-                # Show resolved IDs so admin can verify
-                st.success(f"✅ Selected: **{decom_name}**")
-                with st.expander("Resolved IDs", expanded=False):
-                    st.code(
-                        f"App ID (client ID)    : {decom_app_id}\n"
-                        f"Object ID             : {decom_obj_id}\n"
-                        f"Service Principal ID  : {decom_sp_id}",
-                        language=None,
-                    )
-
-                if not decom_sp_id:
-                    st.warning(
-                        "⚠ Service principal not found for this app. "
-                        "It may have been deleted already or not yet provisioned.",
-                        icon="⚠️",
-                    )
-
-    # ── Decommission form ─────────────────────────────────────────────────────
-    st.divider()
-    st.markdown("**Decommission details**")
-
-    decom_reason = st.text_area(
-        "Reason *",
-        placeholder="App retired — replaced by new platform",
-        key="decom_reason",
-    )
-    decom_revoke = st.checkbox(
-        "Revoke all user assignments before deletion",
-        value=True,
-        key="decom_revoke",
-    )
-
-    if st.button(" Decommission App", type="primary", key="decom_submit"):
-        errors = []
-        if not decom_app_id:
-            errors.append("No application selected. Search and select an app above.")
-        if not decom_reason or len(decom_reason.strip()) < 5:
-            errors.append("Reason must be at least 5 characters.")
-        if not decom_sp_id:
-            errors.append("Service principal ID could not be resolved for this app.")
-
-        if errors:
-            for err in errors:
-                st.error(err)
+    if "decom_sel_app" in st.session_state:
+        app = st.session_state["decom_sel_app"]
+        sp  = st.session_state.get("decom_sel_sp")
+        st.success(f"✅ **{app['displayName']}**")
+        st.code(
+            f"App ID    : {app['appId']}\n"
+            f"Object ID : {app['id']}\n"
+            f"SP ID     : {sp['id'] if sp else 'NOT FOUND'}",
+            language=None,
+        )
+        if not sp:
+            st.error("Service principal not found — cannot decommission.")
         else:
-            from app_bot.triggers.decom_request import handle_decom_request
-            with st.spinner(f"Decommissioning {decom_name}..."):
-                try:
-                    state = asyncio.run(handle_decom_request({
-                        "app_id":                 decom_app_id,
-                        "object_id":              decom_obj_id,
-                        "service_principal_id":   decom_sp_id,
-                        "reason":                 decom_reason.strip(),
-                        "revoke_user_assignments": decom_revoke,
-                        "requested_by":           "streamlit_admin",
-                    }))
-
-                    status = state.get("status")
-                    if status == "completed":
-                        st.success(f"✅ **{decom_name}** decommissioned successfully.")
-                        st.json(state.get("result", {}))
-                        # Clear search state after success
-                        st.session_state.pop("decom_app_results", None)
-                    elif status == "escalated":
-                        st.warning("⏳ Decommission escalated for approval. Check Approvals page.")
-                    else:
-                        st.error(f"Flow ended with status: {status}")
-                        if state.get("error"):
-                            st.exception(state["error"])
-                except Exception as exc:
-                    st.error(f"Decommission failed: {exc}")
+            reason  = st.text_area("Reason *", key="decom_reason")
+            revoke  = st.checkbox("Revoke all user assignments before deletion", value=True)
+            if st.button("🗑 Decommission App", type="primary", key="decom_submit"):
+                if not reason or len(reason.strip()) < 5:
+                    st.error("Reason must be at least 5 characters.")
+                else:
+                    from app_bot.triggers.decom_request import handle_decom_request
+                    with st.spinner(f"Decommissioning {app['displayName']}..."):
+                        try:
+                            result = asyncio.run(handle_decom_request({
+                                "app_id": app["appId"], "object_id": app["id"],
+                                "service_principal_id": sp["id"],
+                                "reason": reason.strip(),
+                                "revoke_user_assignments": revoke,
+                                "requested_by": "streamlit_admin",
+                            }))
+                            s = result.get("status")
+                            if s == "completed":   st.success("✅ Decommissioned."); st.json(result.get("result",{}))
+                            elif s == "escalated": st.warning("⏳ Escalated for approval.")
+                            else:                  st.error(f"Status: {s}")
+                        except Exception as exc:
+                            st.error(f"Error: {exc}")
 

@@ -355,7 +355,7 @@ async def _create_non_gallery_app(
     # Even after creation succeeds, subsequent PATCH/POST calls on the SP
     # can return 404 if the SP hasn't propagated across all replicas yet.
     # We verify with a GET and retry until reachable.
-    sp_verify_delays = [3, 5, 8, 10]
+    sp_verify_delays = [4, 6, 8, 10]
     sp_reachable     = False
     for attempt, delay in enumerate(sp_verify_delays, start=1):
         logger.info(
