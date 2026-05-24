@@ -32,8 +32,8 @@ st.divider()
 
 col1, col2, col3 = st.columns(3)
 col1.page_link("pages/1_dashboard.py",             label="📊 Dashboard",             icon="📊")
-col2.page_link("pages/2_user_management.py",       label="👤 User Management",       icon="👤")
-col3.page_link("pages/3_app_management.py",        label="🖥️ Application Management", icon="🖥️")
+col2.page_link("pages/2_user_management.py",       label="👤 User AI Agent",       icon="👤")
+col3.page_link("pages/3_app_management.py",        label="🖥️ Application AI Agent", icon="🖥️")
 
 col4, col5, _ = st.columns(3)
 col4.page_link("pages/4_action_ai_agent.py",       label="🤖 Action AI Agent",       icon="🤖")

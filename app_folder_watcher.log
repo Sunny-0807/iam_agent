@@ -1,0 +1,24 @@
+07:45:17  INFO      app_folder_watcher  App watcher folders ready:
+07:45:17  INFO      app_folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_apps_inbox
+07:45:17  INFO      app_folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_apps_processing
+07:45:17  INFO      app_folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_apps_processed
+07:45:17  INFO      app_folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_apps_failed
+07:45:17  INFO      app_folder_watcher  ============================================================
+07:45:17  INFO      app_folder_watcher  App folder watcher started.
+07:45:17  INFO      app_folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_apps_inbox
+07:45:17  INFO      app_folder_watcher  Press Ctrl+C to stop.
+07:45:17  INFO      app_folder_watcher  ============================================================
+07:47:16  INFO      app_folder_watcher  Stopping...
+07:47:16  INFO      app_folder_watcher  App folder watcher stopped.
+07:47:20  INFO      app_folder_watcher  App watcher folders ready:
+07:47:20  INFO      app_folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_apps_inbox
+07:47:20  INFO      app_folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_apps_processing
+07:47:20  INFO      app_folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_apps_processed
+07:47:20  INFO      app_folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_apps_failed
+07:47:20  INFO      app_folder_watcher  ============================================================
+07:47:20  INFO      app_folder_watcher  App folder watcher started.
+07:47:20  INFO      app_folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_apps_inbox
+07:47:20  INFO      app_folder_watcher  Press Ctrl+C to stop.
+07:47:20  INFO      app_folder_watcher  ============================================================
+07:47:35  INFO      app_folder_watcher  Stopping...
+07:47:35  INFO      app_folder_watcher  App folder watcher stopped.

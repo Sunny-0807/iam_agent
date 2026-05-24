@@ -1,0 +1,4 @@
+display_name,user_principal_name,department,job_title,usage_location,mail_nickname,manager_upn,group_names,license_name
+IAM Bulk User36,iambulkuser36@michaelkloudkrafthotmail.onmicrosoft.com,Engineering,Dev Ops,IN,iambulkuser36,,test-onboarding-group
+IAM Bulk User37,iambulkuser37@michaelkloudkrafthotmail.onmicrosoft.com,Finance,Financial Analyst,US,iambulkuser37,,test-onbaording-group-1,MICROSOFT FLOW FREE
+IAM Bulk User38,iambulkuser38@michaelkloudkrafthotmail.onmicrosoft.com,HR,Hiring Manager,GB,iambulkuser38,,test-onboarding-group|test-onbaording-group-1

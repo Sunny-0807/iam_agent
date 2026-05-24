@@ -54,26 +54,23 @@ with tab_pipeline:
         run_decision_agent, run_execution_agent,
     )
 
-    mode_label = st.radio(
-        "Pipeline mode",
-        options=["stepwise", "auto"],
-        format_func=lambda x: (
-            "🔢 Step-by-step (manually advance each agent)"
-            if x == "stepwise"
-            else "⚡ Auto-run (all agents run automatically)"
-        ),
-        horizontal=True,
-        key="app_pipeline_mode",
-    )
-    pipeline_mode = PipelineMode.AUTO if mode_label == "auto" else PipelineMode.STEPWISE
+    pipeline_mode = PipelineMode.AUTO
 
     st.divider()
 
     # ── Source ────────────────────────────────────────────────────────────────
-    src_form, src_csv, src_folder = st.tabs(["📝 Single App Form", "📤 Upload CSV", "📁 Inbox Folder"])
     csv_content = csv_filename = None
 
-    with src_form:
+    # Radio persists across reruns — tabs reset to first on st.rerun()
+    source_mode = st.radio(
+        "Source",
+        options=["📝 Single App Form", "📤 Upload CSV", "📁 Folder Watcher (auto)"],
+        horizontal=True,
+        key="app_source_mode",
+        label_visibility="collapsed",
+    )
+
+    if source_mode == "📝 Single App Form":
         with st.form("single_app_form"):
             c1, c2 = st.columns(2)
             s_name = c1.text_input("Display name *", placeholder="My SAML App")
@@ -106,7 +103,7 @@ with tab_pipeline:
                 csv_filename = f"{s_name.replace(' ','_')}_pipeline.csv"
                 st.success(f"✅ **{s_name}** ready for pipeline.")
 
-    with src_csv:
+    elif source_mode == "📤 Upload CSV":
         with st.expander("📄 CSV format", expanded=False):
             st.markdown("""
 | Column | Required |
@@ -126,20 +123,106 @@ with tab_pipeline:
             csv_filename = uploaded.name
             st.success(f"✅ {csv_filename} loaded.")
 
-    with src_folder:
+    else:  # Folder Watcher monitor
+        PROJECT_ROOT_APP = Path(__file__).resolve().parent.parent.parent
         st.info(
-            f"Inbox: `{APP_INBOX}`\n\n"
-            "For automated processing:\n```\npython app_bot/triggers/app_folder_watcher.py\n```",
+            f"The folder watcher automatically processes any CSV placed in:\n\n"
+            f"`{APP_INBOX}`\n\n"
+            "Start the watcher in a separate terminal:\n"
+            "```\npython app_bot/triggers/app_folder_watcher.py\n```\n\n"
+            "Once a file is dropped there, processing starts within 3 seconds "
+            "— no button clicks needed.",
             icon="📁",
         )
-        inbox_files = sorted(APP_INBOX.glob("*.csv"))
-        if inbox_files:
-            sel = st.selectbox("Pick inbox file:", ["(select)"]+[f.name for f in inbox_files], key="app_inbox_sel")
-            if sel != "(select)":
-                csv_content  = (APP_INBOX / sel).read_text(encoding="utf-8")
-                csv_filename = sel
-                st.success(f"✅ {sel} selected.")
+        apps_processing = Path(os.getenv("APP_WATCHER_PROCESSING", str(PROJECT_ROOT_APP / "watched_apps_processing")))
+        apps_processed  = Path(os.getenv("APP_WATCHER_PROCESSED",  str(PROJECT_ROOT_APP / "watched_apps_processed")))
+        apps_failed     = Path(os.getenv("APP_WATCHER_FAILED",     str(PROJECT_ROOT_APP / "watched_apps_failed")))
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("📥 Inbox",      len(list(APP_INBOX.glob("*.csv"))))
+        m2.metric("⚙️ Processing", len(list(apps_processing.glob("*.csv"))) if apps_processing.exists() else 0)
+        m3.metric("✅ Processed",  len(list(apps_processed.glob("*.csv")))  if apps_processed.exists()  else 0)
+        m4.metric("❌ Failed",     len(list(apps_failed.glob("*.csv")))     if apps_failed.exists()     else 0)
+        col_ref2, col_auto2 = st.columns([1, 3])
+        if col_ref2.button("🔄 Refresh", key="app_folder_refresh"):
+            st.rerun()
+        auto_refresh_app = col_auto2.checkbox("Auto-refresh every 5s", key="app_folder_auto_refresh")
 
+        import json, time as _time, csv as _csv2
+        st.divider()
+
+        # ── Pipeline progress from watcher log ────────────────────────────────
+        log_path_app = Path(__file__).resolve().parent.parent.parent / "app_folder_watcher.log"
+        if log_path_app.exists():
+            log_lines_app = log_path_app.read_text(encoding="utf-8").splitlines()
+            last_run = None
+            for i in range(len(log_lines_app)-1, -1, -1):
+                if "Starting pipeline for:" in log_lines_app[i]:
+                    last_run = i; break
+
+            if last_run is not None:
+                run_lines_app = log_lines_app[last_run:]
+                fname_app = next((l.split("Starting pipeline for:")[-1].strip() for l in run_lines_app if "Starting pipeline for:" in l), "")
+                st.markdown(f"### Last run: `{fname_app}`" if fname_app else "### Last run")
+
+                def _done(kw): return any(kw in l for l in run_lines_app)
+                def _fail(kw): return any("ERROR" in l and kw in l for l in run_lines_app)
+
+                a1,a2,a3,a4 = st.columns(4)
+                for col,(icon,label,kw) in zip([a1,a2,a3,a4],[
+                    ("📥","Agent 1 — Collection","Parsed"),
+                    ("🔍","Agent 2 — Analysis","validation"),
+                    ("⚖️","Agent 3 — Decision","policy"),
+                    ("⚡","Agent 4 — Execution","onboarding"),
+                ]):
+                    if _fail(kw):   col.error(f"{icon} {label}", icon="❌")
+                    elif _done(kw): col.success(f"{icon} {label}", icon="✅")
+                    else:           col.caption(f"{icon} {label}")
+
+                if _done("Successfully processed"): st.success("✅ Pipeline completed.")
+                elif _done("Failed to process"):    st.error("❌ Pipeline failed — see log.")
+
+                # Results CSV
+                apps_processed_dir = Path(os.getenv("APP_WATCHER_PROCESSED", str(Path(__file__).resolve().parent.parent.parent / "watched_apps_processed")))
+                if apps_processed_dir.exists():
+                    res_files = sorted(
+                        [f for f in apps_processed_dir.glob("*.csv") if "_results_" in f.name],
+                        key=lambda f: f.stat().st_mtime, reverse=True,
+                    )
+                    if res_files:
+                        latest_app = res_files[0]
+                        st.markdown(f"**Results: `{latest_app.name}`**")
+                        try:
+                            rows_app = list(_csv2.DictReader(latest_app.open(encoding="utf-8")))
+                            if rows_app:
+                                done_c  = sum(1 for r in rows_app if r.get("status")=="completed")
+                                fail_c  = sum(1 for r in rows_app if r.get("status")=="failed")
+                                rc1,rc2 = st.columns(2)
+                                rc1.metric("✅ Completed", done_c)
+                                rc2.metric("❌ Failed",    fail_c)
+                                st.dataframe([{
+                                    "App": r.get("display_name",""),
+                                    "Status": ("✅ " if r.get("status")=="completed" else "❌ ") + r.get("status",""),
+                                    "App ID": r.get("app_id",""),
+                                    "Duration": f"{r.get('duration_seconds','')}s",
+                                    "Error": r.get("error",""),
+                                } for r in rows_app], use_container_width=True, hide_index=True)
+                                with open(latest_app,"rb") as fh:
+                                    st.download_button("⬇️ Download results", fh.read(), latest_app.name, "text/csv", key="app_watcher_dl")
+                        except Exception as exc:
+                            st.warning(f"Could not read results: {exc}")
+
+                with st.expander("📋 Watcher log (last 30 lines)", expanded=False):
+                    st.code("\n".join(log_lines_app[-30:]), language=None)
+            else:
+                st.caption("No runs yet — drop a CSV into the app inbox folder.")
+        else:
+            st.caption("App watcher log not found — start app_folder_watcher.py to see live progress.")
+
+        if auto_refresh_app:
+            _time.sleep(5)
+            st.rerun()
+
+        st.stop()
     if not csv_content:
         st.info("Fill the form, upload a CSV, or select an inbox file to start the pipeline.", icon="⬆️")
         st.stop()
@@ -187,21 +270,16 @@ with tab_pipeline:
         st.success(f"✅ {ps.collection.row_count} row(s) from `{ps.collection.filename}`")
         with st.expander("Preview", expanded=False):
             st.dataframe(ps.collection.rows[:5], use_container_width=True, hide_index=True)
-        if ps.mode == PipelineMode.AUTO and ps.analysis_status == AgentStatus.IDLE:
-            with st.spinner("Auto-running Analysis Agent..."):
-                asyncio.run(run_analysis_agent(ps)); st.session_state[PS_KEY] = ps
-            st.rerun()
 
     st.divider()
 
     # ── Agent 2 ───────────────────────────────────────────────────────────────
     st.markdown("### 🔍 Agent 2 — Analysis")
     if ps.collection_status == AgentStatus.DONE and ps.analysis_status == AgentStatus.IDLE:
-        if ps.mode == PipelineMode.STEPWISE:
-            if st.button("▶ Run Analysis Agent", type="primary", key="app_anal_btn"):
-                with st.spinner("Validating..."):
-                    asyncio.run(run_analysis_agent(ps)); st.session_state[PS_KEY] = ps
-                st.rerun()
+        with st.spinner("Validating..."):
+            asyncio.run(run_analysis_agent(ps))
+            st.session_state[PS_KEY] = ps
+        st.rerun()
 
     if ps.analysis_status == AgentStatus.DONE and ps.analysis:
         a = ps.analysis
@@ -218,21 +296,16 @@ with tab_pipeline:
                 for i in a.issues
             ], use_container_width=True, hide_index=True)
         if not a.has_errors: st.success("✅ All rows passed validation.")
-        if ps.mode == PipelineMode.AUTO and ps.decision_status == AgentStatus.IDLE:
-            with st.spinner("Auto-running Decision Agent..."):
-                asyncio.run(run_decision_agent(ps)); st.session_state[PS_KEY] = ps
-            st.rerun()
 
     st.divider()
 
     # ── Agent 3 ───────────────────────────────────────────────────────────────
     st.markdown("### ⚖️ Agent 3 — Decision")
     if ps.analysis_status == AgentStatus.DONE and ps.decision_status == AgentStatus.IDLE:
-        if ps.mode == PipelineMode.STEPWISE:
-            if st.button("▶ Run Decision Agent", type="primary", key="app_dec_btn"):
-                with st.spinner("Evaluating policies..."):
-                    asyncio.run(run_decision_agent(ps)); st.session_state[PS_KEY] = ps
-                st.rerun()
+        with st.spinner("Evaluating policies..."):
+            asyncio.run(run_decision_agent(ps))
+            st.session_state[PS_KEY] = ps
+        st.rerun()
 
     if ps.decision_status in (AgentStatus.DONE, AgentStatus.WAITING) and ps.decision:
         d = ps.decision
@@ -246,28 +319,46 @@ with tab_pipeline:
                     st.write(f"Row {r.row_num} — **{r.display_name}**")
 
         if d.approval_rows:
-            st.warning(f"⚠️ {len(d.approval_rows)} row(s) require approval:", icon="⚠️")
+            st.warning(
+                f"⚠️ **{len(d.approval_rows)} app(s) require approval before registration.**",
+                icon="⚠️",
+            )
+            ba1, ba2, ba3 = st.columns(3)
+            approve_all_app = ba1.button("✅ Approve all pending", key="app_approve_all")
+            skip_all_app    = ba2.button("⏭ Skip all pending",    key="app_skip_all")
+            ba3.caption(f"{len(d.approval_rows)} app(s) pending")
+
+            if approve_all_app:
+                d.approved_by_admin = [r.row_num for r in d.approval_rows]
+                ps.decision_status  = AgentStatus.DONE
+                st.session_state[PS_KEY] = ps
+                st.success(f"✅ All {len(d.approval_rows)} app(s) approved."); st.rerun()
+
+            if skip_all_app:
+                d.approved_by_admin = []
+                ps.decision_status  = AgentStatus.DONE
+                st.session_state[PS_KEY] = ps
+                st.warning("⏭ All pending apps skipped."); st.rerun()
+
+            st.markdown("**Or approve app by app:**")
             newly = []
             for r in d.approval_rows:
                 already = r.row_num in d.approved_by_admin
-                checked = st.checkbox(
-                    f"**Row {r.row_num} — {r.display_name}**  \n_{r.reason}_",
-                    value=already, key=f"app_approve_{r.row_num}",
+                col_cb, col_info = st.columns([1, 6])
+                checked = col_cb.checkbox("", value=already, key=f"app_approve_{r.row_num}")
+                col_info.markdown(
+                    f"**Row {r.row_num} — {r.display_name}**  \n"
+                    f"<small style='color:gray'>{r.reason}</small>",
+                    unsafe_allow_html=True,
                 )
                 if checked: newly.append(r.row_num)
-            if st.button("💾 Save approvals", key="app_save_approvals"):
-                d.approved_by_admin  = newly
-                ps.decision_status   = AgentStatus.DONE
+            if st.button("💾 Save decisions", key="app_save_approvals"):
+                d.approved_by_admin = newly
+                ps.decision_status  = AgentStatus.DONE
                 st.session_state[PS_KEY] = ps
-                st.success(f"✅ {len(newly)} row(s) approved."); st.rerun()
+                st.success(f"✅ {len(newly)} approved, {len(d.approval_rows)-len(newly)} skipped.")
+                st.rerun()
 
-        if (ps.decision_status == AgentStatus.DONE
-                and ps.execution_status == AgentStatus.IDLE
-                and ps.mode == PipelineMode.AUTO
-                and not d.approval_rows):
-            with st.spinner("Auto-running Execution Agent..."):
-                asyncio.run(run_execution_agent(ps)); st.session_state[PS_KEY] = ps
-            st.rerun()
 
     st.divider()
 
@@ -281,11 +372,11 @@ with tab_pipeline:
     if ps.decision_status == AgentStatus.DONE and ps.execution_status == AgentStatus.IDLE:
         if approved_total == 0:
             st.info("No rows approved — nothing to execute.")
-        elif ps.mode == PipelineMode.STEPWISE:
-            if st.button(f"▶ Run Execution Agent ({approved_total} row(s))", type="primary", key="app_exec_btn"):
-                with st.spinner("Executing... (SAML app registration takes 20-60s per app)"):
-                    asyncio.run(run_execution_agent(ps)); st.session_state[PS_KEY] = ps
-                st.rerun()
+        else:
+            with st.spinner(f"Executing {approved_total} app(s)... (SAML registration takes ~30s per app)"):
+                asyncio.run(run_execution_agent(ps))
+                st.session_state[PS_KEY] = ps
+            st.rerun()
 
     if ps.execution_status == AgentStatus.DONE and ps.execution:
         e       = ps.execution

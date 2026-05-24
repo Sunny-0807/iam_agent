@@ -69,30 +69,74 @@ BOT_META = {
     "ai_assistant": {"icon": "🤖", "label": "Action AI Agent","desc": "Natural language IAM actions"},
 }
 
-# Derive bot from bot_type field; fall back to requested_by for AI assistant entries
+# Derive bot from bot_type field; cross-check flow_name for entries that were
+# incorrectly stamped with the env var bot_type (e.g. all showing as user_bot).
+_APP_FLOW_HINTS   = {"app_onboarding","app_offboarding","saml_app_onboarding",
+                     "bulk_app_onboarding","decommission_app"}
+_AI_ACTION_HINTS  = {"add_to_group","remove_from_group","assign_license",
+                     "remove_license","get_user_info","reset_password",
+                     "set_manager","set_usage_location"}
+
 def _bot_key(e: dict) -> str:
-    bt = e.get("bot_type", "")
-    if bt in BOT_META:
-        return bt
-    if e.get("requested_by") == "ai_assistant":
+    bt  = e.get("bot_type", "")
+    fn  = (e.get("flow_name") or "").lower()
+    rby = e.get("requested_by", "")
+
+    # AI assistant entries — always reliable
+    if bt == "ai_assistant" or rby == "ai_assistant":
         return "ai_assistant"
+
+    # App bot — check flow name even if bt says user_bot (legacy mistagging)
+    if bt == "app_bot" or fn in _APP_FLOW_HINTS or any(x in fn for x in ("saml","decommission","app_onboard")):
+        return "app_bot"
+
+    # Explicit user_bot
+    if bt == "user_bot":
+        return "user_bot"
+
     return bt or "unknown"
 
-bot_counts: dict[str, int] = {}
+# Flow label for display
+def _flow_label(e: dict) -> str:
+    aa = e.get("details", {}).get("assistant_action")
+    if aa:
+        return aa.replace("_", " ").title()
+    fn = e.get("flow_name") or "unknown"
+    return fn.replace("_", " ").title()
+
+# Build bot → {flow_label: count} nested counts
+bot_counts:      dict[str, int]             = {}
+bot_flow_counts: dict[str, dict[str, int]]  = {}
+
 for e in entries:
-    key = _bot_key(e)
+    key   = _bot_key(e)
+    label = _flow_label(e)
     bot_counts[key] = bot_counts.get(key, 0) + 1
+    bot_flow_counts.setdefault(key, {})
+    bot_flow_counts[key][label] = bot_flow_counts[key].get(label, 0) + 1
 
 if bot_counts:
-    # Show known bots in fixed order, then any unknowns
     ordered = [k for k in BOT_META if k in bot_counts]
     ordered += [k for k in bot_counts if k not in BOT_META]
     cols = st.columns(len(ordered))
     for col, key in zip(cols, ordered):
         meta  = BOT_META.get(key, {"icon": "•", "label": key, "desc": ""})
         count = bot_counts[key]
+
+        # Bot total metric
         col.metric(f"{meta['icon']} {meta['label']}", count)
         col.caption(meta["desc"])
+
+        # Flow breakdown beneath — sorted by count descending
+        flows = sorted(bot_flow_counts.get(key, {}).items(), key=lambda x: x[1], reverse=True)
+        for flow_label, flow_count in flows:
+            col.markdown(
+                f"<div style='display:flex;justify-content:space-between;"
+                f"font-size:12px;padding:1px 0;color:var(--text-color,#999)'>"
+                f"<span>{flow_label}</span>"
+                f"<span><b>{flow_count}</b></span></div>",
+                unsafe_allow_html=True,
+            )
 else:
     st.info("No activity recorded yet.")
 
@@ -106,9 +150,7 @@ else:
     for e in entries[:15]:
         status = e.get("status", "")
         icon   = {"completed": "✅", "failed": "❌", "escalated": "⏳"}.get(status, "•")
-        details = e.get("details", {})
-        action  = details.get("assistant_action") or e.get("flow_name", "")
-        action  = action.replace("_", " ").title()
+        action = _flow_label(e)
         pid     = (e.get("principal_id") or "")[:28]
         ts      = e.get("timestamp", "")[:19].replace("T", " ")
         src     = e.get("requested_by", "")

@@ -1,0 +1,4 @@
+row,display_name,upn,status,user_id,duration_seconds,details
+1,IAM Bulk User33,iambulkuser33@michaelkloudkrafthotmail.onmicrosoft.com,completed,e2fd7937-5a42-4376-8791-76c9c029a250,1.38,All operations completed
+2,IAM Bulk User34,iambulkuser34@michaelkloudkrafthotmail.onmicrosoft.com,completed,99bea081-ffc5-4fef-bd65-bdb3be440bf2,2.04,All operations completed
+3,IAM Bulk User35,iambulkuser35@michaelkloudkrafthotmail.onmicrosoft.com,completed,06948932-85a5-4b9f-8eda-1149032342b6,1.21,All operations completed

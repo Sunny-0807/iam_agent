@@ -19,14 +19,17 @@ Usage:
 Stop with Ctrl+C.
 """
 
+
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+
 import asyncio
 import logging
 import os
 import shutil
-import sys
 import time
 from datetime import datetime
-from pathlib import Path
 
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env", override=False)
@@ -64,10 +67,6 @@ def _ensure_folders() -> None:
 
 def _timestamp() -> str:
     return datetime.now().strftime("%Y%m%d_%H%M%S")
-
-
-def _results_filename(original_stem: str) -> str:
-    return f"{original_stem}_results_{_timestamp()}.csv"
 
 
 async def _process_csv(csv_path: Path) -> bool:
@@ -166,45 +165,64 @@ async def _process_csv(csv_path: Path) -> bool:
             summary.failed, summary.skipped, summary.total_duration,
         )
 
-        # ── Step 6: Save results CSV ──────────────────────────────────────────
-        results_filename = _results_filename(stem)
-        results_path     = PROCESSED_DIR / results_filename
+        # ── Step 6 & 7: Save enriched CSV to processed/ ──────────────────────
+        # One file = all original columns + status, user_id, duration_seconds, details.
+        # Result columns are matched to original rows by UPN.
+        RESULT_COLS = ["status", "user_id", "duration_seconds", "details"]
+
+        # Build a lookup: upn → result row
+        result_map: dict[str, object] = {}
+        for r in summary.results:
+            result_map[r.upn.lower()] = r
+
+        # Original CSV column names (preserve exact order)
+        original_fieldnames = list(rows[0].keys()) if rows else []
+        # Add result columns that aren't already in the original
+        extra_cols = [c for c in RESULT_COLS if c not in original_fieldnames]
+        all_fieldnames = original_fieldnames + extra_cols
 
         output = io.StringIO()
-        writer = csv_module.DictWriter(output, fieldnames=[
-            "row", "display_name", "upn", "status",
-            "user_id", "duration_seconds", "details",
-        ])
+        writer = csv_module.DictWriter(output, fieldnames=all_fieldnames,
+                                       extrasaction="ignore")
         writer.writeheader()
-        for r in summary.results:
-            writer.writerow({
-                "row":              r.row,
-                "display_name":     r.display_name,
-                "upn":              r.upn,
-                "status":           r.status.value,
-                "user_id":          r.user_id or "",
-                "duration_seconds": r.duration_seconds,
-                "details":          r.summary_line(),
-            })
 
-        # Add skipped rows from pre-flight errors
         for i, row in enumerate(rows, 1):
+            out_row = dict(row)   # start with all original columns
+            upn     = row.get("user_principal_name", "").lower()
+
             if i in error_rows:
-                upn = row.get("user_principal_name", f"row-{i}")
+                # Pre-flight skipped row
                 err = next((e.message for e in errors if e.row == i), "Pre-flight error")
-                writer.writerow({
-                    "row": i, "display_name": row.get("display_name", upn),
-                    "upn": upn, "status": "skipped",
-                    "user_id": "", "duration_seconds": 0, "details": err,
-                })
+                out_row["status"]           = "skipped"
+                out_row["user_id"]          = ""
+                out_row["duration_seconds"] = 0
+                out_row["details"]          = err
+            elif upn in result_map:
+                r = result_map[upn]
+                out_row["status"]           = r.status.value
+                out_row["user_id"]          = r.user_id or ""
+                out_row["duration_seconds"] = r.duration_seconds
+                out_row["details"]          = r.summary_line()
+            else:
+                out_row["status"]           = "unknown"
+                out_row["user_id"]          = ""
+                out_row["duration_seconds"] = 0
+                out_row["details"]          = ""
 
-        results_path.write_text(output.getvalue(), encoding="utf-8")
-        logger.info("Results saved: %s", results_path.name)
+            writer.writerow(out_row)
 
-        # ── Step 7: Move original to processed ───────────────────────────────
-        dest = PROCESSED_DIR / f"{stem}_{_timestamp()}.csv"
-        shutil.move(str(processing_path), str(dest))
-        logger.info("Original CSV moved to processed: %s", dest.name)
+        enriched_path = PROCESSED_DIR / f"{stem}_{_timestamp()}.csv"
+        enriched_path.write_text(output.getvalue(), encoding="utf-8")
+        logger.info(
+            "Enriched CSV saved: %s  |  columns: %s",
+            enriched_path.name, ", ".join(all_fieldnames),
+        )
+
+        # Remove processing copy and any residual inbox copy
+        processing_path.unlink()
+        if csv_path.exists():
+            csv_path.unlink()
+            logger.info("Removed residual inbox copy: %s", csv_path.name)
 
         return True
 
@@ -284,30 +302,38 @@ class CSVHandler(FileSystemEventHandler):
 
     async def _process_with_settle(self, path: Path) -> None:
         """Wait for file to finish copying before processing."""
-        logger.info(
-            "Waiting %ds for file to settle: %s",
-            FILE_SETTLE_SECONDS, path.name,
-        )
-        await asyncio.sleep(FILE_SETTLE_SECONDS)
+        try:
+            logger.info(
+                "Waiting %ds for file to settle: %s",
+                FILE_SETTLE_SECONDS, path.name,
+            )
+            await asyncio.sleep(FILE_SETTLE_SECONDS)
 
-        # Check file still exists and is not empty
-        if not path.exists():
-            logger.warning("File disappeared before processing: %s", path.name)
+            # Check file still exists and is not empty
+            if not path.exists():
+                logger.warning("File disappeared before processing: %s", path.name)
+                return
+
+            if path.stat().st_size == 0:
+                logger.warning("File is empty, skipping: %s", path.name)
+                return
+
+            logger.info("Starting pipeline for: %s", path.name)
+            success = await _process_csv(path)
+
+            if success:
+                logger.info("✓ Successfully processed: %s", path.name)
+            else:
+                logger.error("✗ Failed to process: %s — check watched_failed/", path.name)
+
+        except Exception as exc:
+            import traceback
+            logger.error(
+                "Unhandled exception processing '%s': %s\n%s",
+                path.name, exc, traceback.format_exc(),
+            )
+        finally:
             self._seen.discard(str(path))
-            return
-
-        if path.stat().st_size == 0:
-            logger.warning("File is empty, skipping: %s", path.name)
-            self._seen.discard(str(path))
-            return
-
-        success = await _process_csv(path)
-        self._seen.discard(str(path))
-
-        if success:
-            logger.info("✓ Successfully processed: %s", path.name)
-        else:
-            logger.error("✗ Failed to process: %s — check watched_failed/", path.name)
 
 
 # ── Main entry point ──────────────────────────────────────────────────────────

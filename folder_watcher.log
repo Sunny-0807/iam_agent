@@ -1,0 +1,522 @@
+07:48:35  INFO      folder_watcher  Watched folders ready:
+07:48:35  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+07:48:35  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+07:48:35  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+07:48:35  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+07:48:35  INFO      folder_watcher  ============================================================
+07:48:35  INFO      folder_watcher  Folder watcher started.
+07:48:35  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+07:48:35  INFO      folder_watcher  Press Ctrl+C to stop.
+07:48:35  INFO      folder_watcher  ============================================================
+07:48:35  INFO      folder_watcher  Found 1 existing CSV file(s) in inbox — processing now...
+07:48:35  INFO      folder_watcher  Waiting 3s for file to settle: Testing_bulk_user.csv
+07:49:37  INFO      folder_watcher  Stopping watcher...
+07:49:37  INFO      folder_watcher  Folder watcher stopped.
+07:50:32  INFO      folder_watcher  Watched folders ready:
+07:50:32  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+07:50:32  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+07:50:32  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+07:50:32  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+07:50:32  INFO      folder_watcher  ============================================================
+07:50:32  INFO      folder_watcher  Folder watcher started.
+07:50:32  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+07:50:32  INFO      folder_watcher  Press Ctrl+C to stop.
+07:50:32  INFO      folder_watcher  ============================================================
+07:50:40  INFO      folder_watcher  New CSV detected: Testing_bulk_user.csv
+07:50:40  INFO      folder_watcher  Waiting 3s for file to settle: Testing_bulk_user.csv
+07:52:57  INFO      folder_watcher  Stopping watcher...
+07:52:57  INFO      folder_watcher  Folder watcher stopped.
+
+
+08:12:40  INFO      folder_watcher  Watched folders ready:
+08:12:40  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+08:12:40  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+08:12:40  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+08:12:40  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+08:12:40  INFO      folder_watcher  ============================================================
+08:12:40  INFO      folder_watcher  Folder watcher started.
+08:12:40  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+08:12:40  INFO      folder_watcher  Press Ctrl+C to stop.
+08:12:40  INFO      folder_watcher  ============================================================
+08:12:40  INFO      folder_watcher  Found 1 existing CSV file(s) in inbox — processing now...
+08:12:40  INFO      folder_watcher  Waiting 3s for file to settle: Testing_bulk_user.csv
+08:15:31  INFO      folder_watcher  Stopping watcher...
+08:15:31  INFO      folder_watcher  Folder watcher stopped.
+
+
+10:09:26  INFO      folder_watcher  Watched folders ready:
+10:09:26  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+10:09:26  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+10:09:26  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+10:09:26  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+10:09:26  INFO      folder_watcher  ============================================================
+10:09:26  INFO      folder_watcher  Folder watcher started.
+10:09:26  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+10:09:26  INFO      folder_watcher  Press Ctrl+C to stop.
+10:09:26  INFO      folder_watcher  ============================================================
+10:09:26  INFO      folder_watcher  Found 1 existing CSV file(s) in inbox — processing now...
+10:09:26  INFO      folder_watcher  Waiting 3s for file to settle: Testing_bulk_user.csv
+10:12:55  INFO      folder_watcher  New CSV detected: Testing_bulk_user.csv
+10:12:55  INFO      folder_watcher  Waiting 3s for file to settle: Testing_bulk_user.csv
+10:16:29  INFO      folder_watcher  Stopping watcher...
+10:16:29  INFO      folder_watcher  Folder watcher stopped.
+10:19:17  INFO      folder_watcher  Watched folders ready:
+10:19:17  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+10:19:17  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+10:19:17  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+10:19:17  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+10:19:17  INFO      folder_watcher  ============================================================
+10:19:17  INFO      folder_watcher  Folder watcher started.
+10:19:17  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+10:19:17  INFO      folder_watcher  Press Ctrl+C to stop.
+10:19:17  INFO      folder_watcher  ============================================================
+10:19:17  INFO      folder_watcher  Found 1 existing CSV file(s) in inbox — processing now...
+10:19:17  INFO      folder_watcher  Waiting 3s for file to settle: Testing_bulk_user.csv
+10:19:26  INFO      folder_watcher  New CSV detected: Testing1_bulk_user.csv
+10:19:26  INFO      folder_watcher  Waiting 3s for file to settle: Testing1_bulk_user.csv
+10:20:16  INFO      folder_watcher  Stopping watcher...
+10:20:16  INFO      folder_watcher  Folder watcher stopped.
+
+
+10:42:28  INFO      folder_watcher  Watched folders ready:
+10:42:28  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+10:42:28  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+10:42:28  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+10:42:28  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+10:42:28  INFO      folder_watcher  ============================================================
+10:42:28  INFO      folder_watcher  Folder watcher started.
+10:42:28  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+10:42:28  INFO      folder_watcher  Press Ctrl+C to stop.
+10:42:28  INFO      folder_watcher  ============================================================
+10:42:33  INFO      folder_watcher  New CSV detected: Testing1_bulk_user.csv
+10:42:33  INFO      folder_watcher  Waiting 3s for file to settle: Testing1_bulk_user.csv
+10:42:36  INFO      folder_watcher  Starting pipeline for: Testing1_bulk_user.csv
+10:42:36  ERROR     folder_watcher  Unhandled exception processing 'Testing1_bulk_user.csv': No module named 'user_bot'
+Traceback (most recent call last):
+  File "/home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/user_bot/triggers/folder_watcher.py", line 308, in _process_with_settle
+    success = await _process_csv(path)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/user_bot/triggers/folder_watcher.py", line 89, in _process_csv
+    from user_bot.triggers.csv_bulk_user_trigger import (
+ModuleNotFoundError: No module named 'user_bot'
+
+10:43:22  INFO      folder_watcher  Stopping watcher...
+10:43:22  INFO      folder_watcher  Folder watcher stopped.
+10:44:38  INFO      folder_watcher  Watched folders ready:
+10:44:38  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+10:44:38  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+10:44:38  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+10:44:38  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+10:44:38  INFO      folder_watcher  ============================================================
+10:44:38  INFO      folder_watcher  Folder watcher started.
+10:44:38  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+10:44:38  INFO      folder_watcher  Press Ctrl+C to stop.
+10:44:38  INFO      folder_watcher  ============================================================
+10:44:38  INFO      folder_watcher  Found 1 existing CSV file(s) in inbox — processing now...
+10:44:38  INFO      folder_watcher  Waiting 3s for file to settle: Testing1_bulk_user.csv
+10:44:41  INFO      folder_watcher  Starting pipeline for: Testing1_bulk_user.csv
+10:44:41  ERROR     folder_watcher  Unhandled exception processing 'Testing1_bulk_user.csv': No module named 'user_bot'
+Traceback (most recent call last):
+  File "/home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/user_bot/triggers/folder_watcher.py", line 308, in _process_with_settle
+    success = await _process_csv(path)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/user_bot/triggers/folder_watcher.py", line 89, in _process_csv
+    from user_bot.triggers.csv_bulk_user_trigger import (
+ModuleNotFoundError: No module named 'user_bot'
+
+05:25:31  INFO      folder_watcher  Watched folders ready:
+05:25:31  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+05:25:31  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+05:25:31  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+05:25:31  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+05:25:31  INFO      folder_watcher  ============================================================
+05:25:31  INFO      folder_watcher  Folder watcher started.
+05:25:31  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+05:25:31  INFO      folder_watcher  Press Ctrl+C to stop.
+05:25:31  INFO      folder_watcher  ============================================================
+05:25:37  INFO      folder_watcher  New CSV detected: Testing1_bulk_user.csv
+05:25:37  INFO      folder_watcher  Waiting 3s for file to settle: Testing1_bulk_user.csv
+05:25:40  INFO      folder_watcher  Starting pipeline for: Testing1_bulk_user.csv
+05:25:41  INFO      ai_engine._openai_client  OpenAI client: Azure (endpoint=https://kraft-cyber.cognitiveservices.azure.com/)
+05:25:41  INFO      ai_engine._openai_client  OpenAI client: Azure (endpoint=https://kraft-cyber.cognitiveservices.azure.com/)
+05:25:41  WARNING   ai_engine.orchestrator  SKIP_APPROVAL=true — approval gate is DISABLED. All flows will auto-execute. Never use this in production.
+05:25:41  INFO      folder_watcher  Moved to processing: Testing1_bulk_user.csv
+05:25:41  INFO      folder_watcher  Parsed 3 row(s) from 'Testing1_bulk_user.csv'.
+05:25:41  INFO      folder_watcher  Running pre-flight validation...
+05:25:41  INFO      msal.authority  Initializing with Entra authority: https://login.microsoftonline.com/5950e39e-81d1-45a1-8618-fe39a39b0448
+05:25:41  INFO      shared.graph_client.auth  Acquired new Graph API token. Expires in 3599s.
+05:25:42  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser33@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:25:42  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser34@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:25:42  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser35@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:25:42  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onboarding-group%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:25:42  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onbaording-group-1%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:25:42  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/subscribedSkus?%24select=skuId%2CskuPartNumber%2CconsumedUnits%2CprepaidUnits "HTTP/1.1 200 OK"
+05:25:42  INFO      shared.graph_client.graph_client  License matched via friendly name map: 'MICROSOFT FLOW FREE' -> FLOW_FREE
+05:25:42  INFO      folder_watcher  Resolving names to IDs for 3 row(s) (0 skipped)...
+05:25:42  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onbaording-group-1%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:25:42  INFO      user_bot.triggers.csv_bulk_user_trigger  Group resolved: 'test-onbaording-group-1' -> 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:25:43  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onboarding-group%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:25:43  INFO      user_bot.triggers.csv_bulk_user_trigger  Group resolved: 'test-onboarding-group' -> 12761bce-2c06-4cf0-8820-76342656e1b2
+05:25:43  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/subscribedSkus?%24select=skuId%2CskuPartNumber%2CconsumedUnits%2CprepaidUnits "HTTP/1.1 200 OK"
+05:25:43  INFO      shared.graph_client.graph_client  License matched via friendly name map: 'MICROSOFT FLOW FREE' -> FLOW_FREE
+05:25:43  INFO      user_bot.triggers.csv_bulk_user_trigger  License resolved: 'MICROSOFT FLOW FREE' -> f30db892-07e9-47e9-837c-80727f46fd3d
+05:25:43  INFO      folder_watcher  Starting bulk onboarding for 3 user(s)...
+05:25:43  WARNING   shared.audit.audit_logger  AuditLogger: writing to local file /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/audit.jsonl
+05:25:43  INFO      user_bot.flows.bulk_user_onboarding  Bulk user onboarding started: 3 user(s) dry_run=False
+05:25:43  INFO      user_bot.flows.bulk_user_onboarding  Processing row 1/3: iambulkuser33@michaelkloudkrafthotmail.onmicrosoft.com
+05:25:43  INFO      shared.graph_client.graph_client  Creating user: iambulkuser33@michaelkloudkrafthotmail.onmicrosoft.com
+05:25:43  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:25:43  INFO      shared.graph_client.graph_client  User created with ID: e2fd7937-5a42-4376-8791-76c9c029a250
+05:25:43  INFO      user_bot.flows.bulk_user_onboarding  Row 1: account created user_id=e2fd7937-5a42-4376-8791-76c9c029a250
+05:25:43  INFO      shared.graph_client.graph_client  Adding user e2fd7937-5a42-4376-8791-76c9c029a250 to group 12761bce-2c06-4cf0-8820-76342656e1b2
+05:25:44  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/12761bce-2c06-4cf0-8820-76342656e1b2/members/$ref "HTTP/1.1 204 No Content"
+05:25:44  INFO      user_bot.flows.bulk_user_onboarding  Row 1: groups 1/1 assigned.
+05:25:44  INFO      user_bot.flows.bulk_user_onboarding  Row 1: status=completed duration=1.38s
+05:25:44  INFO      user_bot.flows.bulk_user_onboarding  Processing row 2/3: iambulkuser34@michaelkloudkrafthotmail.onmicrosoft.com
+05:25:44  INFO      shared.graph_client.graph_client  Creating user: iambulkuser34@michaelkloudkrafthotmail.onmicrosoft.com
+05:25:45  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:25:45  INFO      shared.graph_client.graph_client  User created with ID: 99bea081-ffc5-4fef-bd65-bdb3be440bf2
+05:25:45  INFO      user_bot.flows.bulk_user_onboarding  Row 2: account created user_id=99bea081-ffc5-4fef-bd65-bdb3be440bf2
+05:25:45  INFO      shared.graph_client.graph_client  Adding user 99bea081-ffc5-4fef-bd65-bdb3be440bf2 to group 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:25:46  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/75ab3c19-c4ad-40e7-8455-b5decb41d8da/members/$ref "HTTP/1.1 204 No Content"
+05:25:46  INFO      user_bot.flows.bulk_user_onboarding  Row 2: groups 1/1 assigned.
+05:25:46  INFO      shared.graph_client.graph_client  Assigning license f30db892-07e9-47e9-837c-80727f46fd3d to user 99bea081-ffc5-4fef-bd65-bdb3be440bf2
+05:25:46  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users/99bea081-ffc5-4fef-bd65-bdb3be440bf2/assignLicense "HTTP/1.1 200 OK"
+05:25:46  INFO      user_bot.flows.bulk_user_onboarding  Row 2: license 'MICROSOFT FLOW FREE' assigned.
+05:25:46  INFO      user_bot.flows.bulk_user_onboarding  Row 2: status=completed duration=2.04s
+05:25:46  INFO      user_bot.flows.bulk_user_onboarding  Processing row 3/3: iambulkuser35@michaelkloudkrafthotmail.onmicrosoft.com
+05:25:46  INFO      shared.graph_client.graph_client  Creating user: iambulkuser35@michaelkloudkrafthotmail.onmicrosoft.com
+05:25:47  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:25:47  INFO      shared.graph_client.graph_client  User created with ID: 06948932-85a5-4b9f-8eda-1149032342b6
+05:25:47  INFO      user_bot.flows.bulk_user_onboarding  Row 3: account created user_id=06948932-85a5-4b9f-8eda-1149032342b6
+05:25:47  INFO      shared.graph_client.graph_client  Adding user 06948932-85a5-4b9f-8eda-1149032342b6 to group 12761bce-2c06-4cf0-8820-76342656e1b2
+05:25:47  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/12761bce-2c06-4cf0-8820-76342656e1b2/members/$ref "HTTP/1.1 204 No Content"
+05:25:47  INFO      shared.graph_client.graph_client  Adding user 06948932-85a5-4b9f-8eda-1149032342b6 to group 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:25:47  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/75ab3c19-c4ad-40e7-8455-b5decb41d8da/members/$ref "HTTP/1.1 204 No Content"
+05:25:47  INFO      user_bot.flows.bulk_user_onboarding  Row 3: groups 2/2 assigned.
+05:25:47  INFO      user_bot.flows.bulk_user_onboarding  Row 3: status=completed duration=1.21s
+05:25:47  INFO      user_bot.flows.bulk_user_onboarding  Bulk user onboarding complete: total=3 completed=3 partial=0 failed=0 skipped=0 duration=4.67s dry_run=False
+05:25:47  INFO      folder_watcher  Bulk onboarding complete: total=3 completed=3 partial=0 failed=0 skipped=0 duration=4.67s
+05:25:47  INFO      folder_watcher  Results saved: Testing1_bulk_user_results_20260524_052547.csv
+05:25:47  INFO      folder_watcher  Original CSV moved to processed: Testing1_bulk_user_20260524_052547.csv
+05:25:47  INFO      folder_watcher  ✓ Successfully processed: Testing1_bulk_user.csv
+05:27:17  INFO      folder_watcher  Stopping watcher...
+05:27:17  INFO      folder_watcher  Folder watcher stopped.
+
+
+05:34:09  INFO      folder_watcher  Watched folders ready:
+05:34:09  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+05:34:09  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+05:34:09  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+05:34:09  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+05:34:09  INFO      folder_watcher  ============================================================
+05:34:09  INFO      folder_watcher  Folder watcher started.
+05:34:09  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+05:34:09  INFO      folder_watcher  Press Ctrl+C to stop.
+05:34:09  INFO      folder_watcher  ============================================================
+05:34:14  INFO      folder_watcher  New CSV detected: Testing1_bulk_user.csv
+05:34:14  INFO      folder_watcher  Waiting 3s for file to settle: Testing1_bulk_user.csv
+05:34:17  INFO      folder_watcher  Starting pipeline for: Testing1_bulk_user.csv
+05:34:18  INFO      ai_engine._openai_client  OpenAI client: Azure (endpoint=https://kraft-cyber.cognitiveservices.azure.com/)
+05:34:18  INFO      ai_engine._openai_client  OpenAI client: Azure (endpoint=https://kraft-cyber.cognitiveservices.azure.com/)
+05:34:18  WARNING   ai_engine.orchestrator  SKIP_APPROVAL=true — approval gate is DISABLED. All flows will auto-execute. Never use this in production.
+05:34:18  INFO      folder_watcher  Moved to processing: Testing1_bulk_user.csv
+05:34:18  INFO      folder_watcher  Parsed 3 row(s) from 'Testing1_bulk_user.csv'.
+05:34:18  INFO      folder_watcher  Running pre-flight validation...
+05:34:18  INFO      msal.authority  Initializing with Entra authority: https://login.microsoftonline.com/5950e39e-81d1-45a1-8618-fe39a39b0448
+05:34:19  INFO      shared.graph_client.auth  Acquired new Graph API token. Expires in 3599s.
+05:34:19  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser36@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:34:19  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser37@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:34:19  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser38@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:34:19  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onboarding-group%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:34:19  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onbaording-group-1%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:34:19  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/subscribedSkus?%24select=skuId%2CskuPartNumber%2CconsumedUnits%2CprepaidUnits "HTTP/1.1 200 OK"
+05:34:19  INFO      shared.graph_client.graph_client  License matched via friendly name map: 'MICROSOFT FLOW FREE' -> FLOW_FREE
+05:34:19  INFO      folder_watcher  Resolving names to IDs for 3 row(s) (0 skipped)...
+05:34:19  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onboarding-group%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:34:19  INFO      user_bot.triggers.csv_bulk_user_trigger  Group resolved: 'test-onboarding-group' -> 12761bce-2c06-4cf0-8820-76342656e1b2
+05:34:20  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onbaording-group-1%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:34:20  INFO      user_bot.triggers.csv_bulk_user_trigger  Group resolved: 'test-onbaording-group-1' -> 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:34:20  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/subscribedSkus?%24select=skuId%2CskuPartNumber%2CconsumedUnits%2CprepaidUnits "HTTP/1.1 200 OK"
+05:34:20  INFO      shared.graph_client.graph_client  License matched via friendly name map: 'MICROSOFT FLOW FREE' -> FLOW_FREE
+05:34:20  INFO      user_bot.triggers.csv_bulk_user_trigger  License resolved: 'MICROSOFT FLOW FREE' -> f30db892-07e9-47e9-837c-80727f46fd3d
+05:34:20  INFO      folder_watcher  Starting bulk onboarding for 3 user(s)...
+05:34:20  WARNING   shared.audit.audit_logger  AuditLogger: writing to local file /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/audit.jsonl
+05:34:20  INFO      user_bot.flows.bulk_user_onboarding  Bulk user onboarding started: 3 user(s) dry_run=False
+05:34:20  INFO      user_bot.flows.bulk_user_onboarding  Processing row 1/3: iambulkuser36@michaelkloudkrafthotmail.onmicrosoft.com
+05:34:20  INFO      shared.graph_client.graph_client  Creating user: iambulkuser36@michaelkloudkrafthotmail.onmicrosoft.com
+05:34:20  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:34:20  INFO      shared.graph_client.graph_client  User created with ID: 79320cbf-5168-476b-b018-6d6f8a1f3506
+05:34:20  INFO      user_bot.flows.bulk_user_onboarding  Row 1: account created user_id=79320cbf-5168-476b-b018-6d6f8a1f3506
+05:34:20  INFO      shared.graph_client.graph_client  Adding user 79320cbf-5168-476b-b018-6d6f8a1f3506 to group 12761bce-2c06-4cf0-8820-76342656e1b2
+05:34:20  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/12761bce-2c06-4cf0-8820-76342656e1b2/members/$ref "HTTP/1.1 204 No Content"
+05:34:20  INFO      user_bot.flows.bulk_user_onboarding  Row 1: groups 1/1 assigned.
+05:34:20  INFO      user_bot.flows.bulk_user_onboarding  Row 1: status=completed duration=0.56s
+05:34:20  INFO      user_bot.flows.bulk_user_onboarding  Processing row 2/3: iambulkuser37@michaelkloudkrafthotmail.onmicrosoft.com
+05:34:20  INFO      shared.graph_client.graph_client  Creating user: iambulkuser37@michaelkloudkrafthotmail.onmicrosoft.com
+05:34:21  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:34:21  INFO      shared.graph_client.graph_client  User created with ID: 4b965f9d-6dbd-4def-bb27-d198198ba937
+05:34:21  INFO      user_bot.flows.bulk_user_onboarding  Row 2: account created user_id=4b965f9d-6dbd-4def-bb27-d198198ba937
+05:34:21  INFO      shared.graph_client.graph_client  Adding user 4b965f9d-6dbd-4def-bb27-d198198ba937 to group 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:34:21  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/75ab3c19-c4ad-40e7-8455-b5decb41d8da/members/$ref "HTTP/1.1 204 No Content"
+05:34:21  INFO      user_bot.flows.bulk_user_onboarding  Row 2: groups 1/1 assigned.
+05:34:21  INFO      shared.graph_client.graph_client  Assigning license f30db892-07e9-47e9-837c-80727f46fd3d to user 4b965f9d-6dbd-4def-bb27-d198198ba937
+05:34:22  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users/4b965f9d-6dbd-4def-bb27-d198198ba937/assignLicense "HTTP/1.1 200 OK"
+05:34:22  INFO      user_bot.flows.bulk_user_onboarding  Row 2: license 'MICROSOFT FLOW FREE' assigned.
+05:34:22  INFO      user_bot.flows.bulk_user_onboarding  Row 2: status=completed duration=1.61s
+05:34:22  INFO      user_bot.flows.bulk_user_onboarding  Processing row 3/3: iambulkuser38@michaelkloudkrafthotmail.onmicrosoft.com
+05:34:22  INFO      shared.graph_client.graph_client  Creating user: iambulkuser38@michaelkloudkrafthotmail.onmicrosoft.com
+05:34:22  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:34:22  INFO      shared.graph_client.graph_client  User created with ID: 445c0038-807b-4a9e-8497-1867d2d33125
+05:34:22  INFO      user_bot.flows.bulk_user_onboarding  Row 3: account created user_id=445c0038-807b-4a9e-8497-1867d2d33125
+05:34:22  INFO      shared.graph_client.graph_client  Adding user 445c0038-807b-4a9e-8497-1867d2d33125 to group 12761bce-2c06-4cf0-8820-76342656e1b2
+05:34:23  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/12761bce-2c06-4cf0-8820-76342656e1b2/members/$ref "HTTP/1.1 204 No Content"
+05:34:23  INFO      shared.graph_client.graph_client  Adding user 445c0038-807b-4a9e-8497-1867d2d33125 to group 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:34:24  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/75ab3c19-c4ad-40e7-8455-b5decb41d8da/members/$ref "HTTP/1.1 204 No Content"
+05:34:24  INFO      user_bot.flows.bulk_user_onboarding  Row 3: groups 2/2 assigned.
+05:34:24  INFO      user_bot.flows.bulk_user_onboarding  Row 3: status=completed duration=1.92s
+05:34:24  INFO      user_bot.flows.bulk_user_onboarding  Bulk user onboarding complete: total=3 completed=3 partial=0 failed=0 skipped=0 duration=4.09s dry_run=False
+05:34:24  INFO      folder_watcher  Bulk onboarding complete: total=3 completed=3 partial=0 failed=0 skipped=0 duration=4.09s
+05:34:24  INFO      folder_watcher  Results saved: Testing1_bulk_user_results_20260524_053424.csv
+05:34:24  INFO      folder_watcher  Original CSV moved to processed: Testing1_bulk_user_20260524_053424.csv
+05:34:24  INFO      folder_watcher  ✓ Successfully processed: Testing1_bulk_user.csv
+05:35:01  INFO      folder_watcher  Stopping watcher...
+05:35:01  INFO      folder_watcher  Folder watcher stopped.
+
+
+05:51:11  INFO      folder_watcher  Watched folders ready:
+05:51:11  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+05:51:11  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+05:51:11  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+05:51:11  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+05:51:11  INFO      folder_watcher  ============================================================
+05:51:11  INFO      folder_watcher  Folder watcher started.
+05:51:11  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+05:51:11  INFO      folder_watcher  Press Ctrl+C to stop.
+05:51:11  INFO      folder_watcher  ============================================================
+05:51:34  INFO      folder_watcher  New CSV detected: Testing2_bulk_user.csv
+05:51:34  INFO      folder_watcher  Waiting 3s for file to settle: Testing2_bulk_user.csv
+05:51:37  INFO      folder_watcher  Starting pipeline for: Testing2_bulk_user.csv
+05:51:38  INFO      ai_engine._openai_client  OpenAI client: Azure (endpoint=https://kraft-cyber.cognitiveservices.azure.com/)
+05:51:38  INFO      ai_engine._openai_client  OpenAI client: Azure (endpoint=https://kraft-cyber.cognitiveservices.azure.com/)
+05:51:38  WARNING   ai_engine.orchestrator  SKIP_APPROVAL=true — approval gate is DISABLED. All flows will auto-execute. Never use this in production.
+05:51:38  INFO      folder_watcher  Moved to processing: Testing2_bulk_user.csv
+05:51:38  INFO      folder_watcher  Parsed 3 row(s) from 'Testing2_bulk_user.csv'.
+05:51:38  INFO      folder_watcher  Running pre-flight validation...
+05:51:38  INFO      msal.authority  Initializing with Entra authority: https://login.microsoftonline.com/5950e39e-81d1-45a1-8618-fe39a39b0448
+05:51:39  INFO      shared.graph_client.auth  Acquired new Graph API token. Expires in 3599s.
+05:51:39  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser39@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:51:40  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser40@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:51:40  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser41@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:51:40  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onboarding-group%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:51:40  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onbaording-group-1%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:51:40  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/subscribedSkus?%24select=skuId%2CskuPartNumber%2CconsumedUnits%2CprepaidUnits "HTTP/1.1 200 OK"
+05:51:40  INFO      shared.graph_client.graph_client  License matched via friendly name map: 'MICROSOFT FLOW FREE' -> FLOW_FREE
+05:51:40  INFO      folder_watcher  Resolving names to IDs for 3 row(s) (0 skipped)...
+05:51:40  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onboarding-group%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:51:40  INFO      user_bot.triggers.csv_bulk_user_trigger  Group resolved: 'test-onboarding-group' -> 12761bce-2c06-4cf0-8820-76342656e1b2
+05:51:40  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onbaording-group-1%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:51:40  INFO      user_bot.triggers.csv_bulk_user_trigger  Group resolved: 'test-onbaording-group-1' -> 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:51:41  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/subscribedSkus?%24select=skuId%2CskuPartNumber%2CconsumedUnits%2CprepaidUnits "HTTP/1.1 200 OK"
+05:51:41  INFO      shared.graph_client.graph_client  License matched via friendly name map: 'MICROSOFT FLOW FREE' -> FLOW_FREE
+05:51:41  INFO      user_bot.triggers.csv_bulk_user_trigger  License resolved: 'MICROSOFT FLOW FREE' -> f30db892-07e9-47e9-837c-80727f46fd3d
+05:51:41  INFO      folder_watcher  Starting bulk onboarding for 3 user(s)...
+05:51:41  WARNING   shared.audit.audit_logger  AuditLogger: writing to local file /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/audit.jsonl
+05:51:41  INFO      user_bot.flows.bulk_user_onboarding  Bulk user onboarding started: 3 user(s) dry_run=False
+05:51:41  INFO      user_bot.flows.bulk_user_onboarding  Processing row 1/3: iambulkuser39@michaelkloudkrafthotmail.onmicrosoft.com
+05:51:41  INFO      shared.graph_client.graph_client  Creating user: iambulkuser39@michaelkloudkrafthotmail.onmicrosoft.com
+05:51:41  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:51:41  INFO      shared.graph_client.graph_client  User created with ID: 5b07e87b-be76-4972-b947-504335408897
+05:51:41  INFO      user_bot.flows.bulk_user_onboarding  Row 1: account created user_id=5b07e87b-be76-4972-b947-504335408897
+05:51:41  INFO      shared.graph_client.graph_client  Adding user 5b07e87b-be76-4972-b947-504335408897 to group 12761bce-2c06-4cf0-8820-76342656e1b2
+05:51:42  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/12761bce-2c06-4cf0-8820-76342656e1b2/members/$ref "HTTP/1.1 204 No Content"
+05:51:42  INFO      user_bot.flows.bulk_user_onboarding  Row 1: groups 1/1 assigned.
+05:51:42  INFO      user_bot.flows.bulk_user_onboarding  Row 1: status=completed duration=1.49s
+05:51:42  INFO      user_bot.flows.bulk_user_onboarding  Processing row 2/3: iambulkuser40@michaelkloudkrafthotmail.onmicrosoft.com
+05:51:42  INFO      shared.graph_client.graph_client  Creating user: iambulkuser40@michaelkloudkrafthotmail.onmicrosoft.com
+05:51:42  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:51:42  INFO      shared.graph_client.graph_client  User created with ID: 81ca46dc-89e0-4519-8202-de9e4026432c
+05:51:42  INFO      user_bot.flows.bulk_user_onboarding  Row 2: account created user_id=81ca46dc-89e0-4519-8202-de9e4026432c
+05:51:42  INFO      shared.graph_client.graph_client  Adding user 81ca46dc-89e0-4519-8202-de9e4026432c to group 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:51:44  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/75ab3c19-c4ad-40e7-8455-b5decb41d8da/members/$ref "HTTP/1.1 204 No Content"
+05:51:44  INFO      user_bot.flows.bulk_user_onboarding  Row 2: groups 1/1 assigned.
+05:51:44  INFO      shared.graph_client.graph_client  Assigning license f30db892-07e9-47e9-837c-80727f46fd3d to user 81ca46dc-89e0-4519-8202-de9e4026432c
+05:51:44  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users/81ca46dc-89e0-4519-8202-de9e4026432c/assignLicense "HTTP/1.1 200 OK"
+05:51:44  INFO      user_bot.flows.bulk_user_onboarding  Row 2: license 'MICROSOFT FLOW FREE' assigned.
+05:51:44  INFO      user_bot.flows.bulk_user_onboarding  Row 2: status=completed duration=1.95s
+05:51:44  INFO      user_bot.flows.bulk_user_onboarding  Processing row 3/3: iambulkuser41@michaelkloudkrafthotmail.onmicrosoft.com
+05:51:44  INFO      shared.graph_client.graph_client  Creating user: iambulkuser41@michaelkloudkrafthotmail.onmicrosoft.com
+05:51:45  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:51:45  INFO      shared.graph_client.graph_client  User created with ID: e1b61a8f-9805-4644-aa65-dafb7ed6aed7
+05:51:45  INFO      user_bot.flows.bulk_user_onboarding  Row 3: account created user_id=e1b61a8f-9805-4644-aa65-dafb7ed6aed7
+05:51:45  INFO      shared.graph_client.graph_client  Adding user e1b61a8f-9805-4644-aa65-dafb7ed6aed7 to group 12761bce-2c06-4cf0-8820-76342656e1b2
+05:51:45  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/12761bce-2c06-4cf0-8820-76342656e1b2/members/$ref "HTTP/1.1 204 No Content"
+05:51:45  INFO      shared.graph_client.graph_client  Adding user e1b61a8f-9805-4644-aa65-dafb7ed6aed7 to group 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:51:46  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/75ab3c19-c4ad-40e7-8455-b5decb41d8da/members/$ref "HTTP/1.1 204 No Content"
+05:51:46  INFO      user_bot.flows.bulk_user_onboarding  Row 3: groups 2/2 assigned.
+05:51:46  INFO      user_bot.flows.bulk_user_onboarding  Row 3: status=completed duration=2.18s
+05:51:46  INFO      user_bot.flows.bulk_user_onboarding  Bulk user onboarding complete: total=3 completed=3 partial=0 failed=0 skipped=0 duration=5.62s dry_run=False
+05:51:46  INFO      folder_watcher  Bulk onboarding complete: total=3 completed=3 partial=0 failed=0 skipped=0 duration=5.62s
+05:51:46  INFO      folder_watcher  Results saved: Testing2_bulk_user_results_20260524_055146.csv
+05:51:46  INFO      folder_watcher  Original CSV moved to processed: Testing2_bulk_user_20260524_055146.csv
+05:51:46  INFO      folder_watcher  ✓ Successfully processed: Testing2_bulk_user.csv
+05:54:24  INFO      folder_watcher  Stopping watcher...
+05:54:24  INFO      folder_watcher  Folder watcher stopped.
+05:57:43  INFO      folder_watcher  Watched folders ready:
+05:57:43  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+05:57:43  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+05:57:43  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+05:57:43  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+05:57:43  INFO      folder_watcher  ============================================================
+05:57:43  INFO      folder_watcher  Folder watcher started.
+05:57:43  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+05:57:43  INFO      folder_watcher  Press Ctrl+C to stop.
+05:57:43  INFO      folder_watcher  ============================================================
+05:58:00  INFO      folder_watcher  New CSV detected: Testing3_bulk_user.csv
+05:58:00  INFO      folder_watcher  Waiting 3s for file to settle: Testing3_bulk_user.csv
+05:58:03  INFO      folder_watcher  Starting pipeline for: Testing3_bulk_user.csv
+05:58:04  INFO      ai_engine._openai_client  OpenAI client: Azure (endpoint=https://kraft-cyber.cognitiveservices.azure.com/)
+05:58:04  INFO      ai_engine._openai_client  OpenAI client: Azure (endpoint=https://kraft-cyber.cognitiveservices.azure.com/)
+05:58:04  WARNING   ai_engine.orchestrator  SKIP_APPROVAL=true — approval gate is DISABLED. All flows will auto-execute. Never use this in production.
+05:58:04  INFO      folder_watcher  Moved to processing: Testing3_bulk_user.csv
+05:58:04  INFO      folder_watcher  Parsed 3 row(s) from 'Testing3_bulk_user.csv'.
+05:58:04  INFO      folder_watcher  Running pre-flight validation...
+05:58:04  INFO      msal.authority  Initializing with Entra authority: https://login.microsoftonline.com/5950e39e-81d1-45a1-8618-fe39a39b0448
+05:58:05  INFO      shared.graph_client.auth  Acquired new Graph API token. Expires in 3599s.
+05:58:05  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser42@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:58:05  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser43@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:58:05  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser44@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+05:58:05  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onboarding-group%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:58:05  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onbaording-group-1%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:58:06  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/subscribedSkus?%24select=skuId%2CskuPartNumber%2CconsumedUnits%2CprepaidUnits "HTTP/1.1 200 OK"
+05:58:06  INFO      shared.graph_client.graph_client  License matched via friendly name map: 'MICROSOFT FLOW FREE' -> FLOW_FREE
+05:58:06  INFO      folder_watcher  Resolving names to IDs for 3 row(s) (0 skipped)...
+05:58:06  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onboarding-group%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:58:06  INFO      user_bot.triggers.csv_bulk_user_trigger  Group resolved: 'test-onboarding-group' -> 12761bce-2c06-4cf0-8820-76342656e1b2
+05:58:06  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onbaording-group-1%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+05:58:06  INFO      user_bot.triggers.csv_bulk_user_trigger  Group resolved: 'test-onbaording-group-1' -> 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:58:06  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/subscribedSkus?%24select=skuId%2CskuPartNumber%2CconsumedUnits%2CprepaidUnits "HTTP/1.1 200 OK"
+05:58:06  INFO      shared.graph_client.graph_client  License matched via friendly name map: 'MICROSOFT FLOW FREE' -> FLOW_FREE
+05:58:06  INFO      user_bot.triggers.csv_bulk_user_trigger  License resolved: 'MICROSOFT FLOW FREE' -> f30db892-07e9-47e9-837c-80727f46fd3d
+05:58:06  INFO      folder_watcher  Starting bulk onboarding for 3 user(s)...
+05:58:06  WARNING   shared.audit.audit_logger  AuditLogger: writing to local file /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/audit.jsonl
+05:58:06  INFO      user_bot.flows.bulk_user_onboarding  Bulk user onboarding started: 3 user(s) dry_run=False
+05:58:06  INFO      user_bot.flows.bulk_user_onboarding  Processing row 1/3: iambulkuser42@michaelkloudkrafthotmail.onmicrosoft.com
+05:58:06  INFO      shared.graph_client.graph_client  Creating user: iambulkuser42@michaelkloudkrafthotmail.onmicrosoft.com
+05:58:07  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:58:07  INFO      shared.graph_client.graph_client  User created with ID: c66280de-b387-476f-a59e-0a1a75e0ec6e
+05:58:07  INFO      user_bot.flows.bulk_user_onboarding  Row 1: account created user_id=c66280de-b387-476f-a59e-0a1a75e0ec6e
+05:58:07  INFO      shared.graph_client.graph_client  Adding user c66280de-b387-476f-a59e-0a1a75e0ec6e to group 12761bce-2c06-4cf0-8820-76342656e1b2
+05:58:07  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/12761bce-2c06-4cf0-8820-76342656e1b2/members/$ref "HTTP/1.1 204 No Content"
+05:58:07  INFO      user_bot.flows.bulk_user_onboarding  Row 1: groups 1/1 assigned.
+05:58:07  INFO      user_bot.flows.bulk_user_onboarding  Row 1: status=completed duration=0.69s
+05:58:07  INFO      user_bot.flows.bulk_user_onboarding  Processing row 2/3: iambulkuser43@michaelkloudkrafthotmail.onmicrosoft.com
+05:58:07  INFO      shared.graph_client.graph_client  Creating user: iambulkuser43@michaelkloudkrafthotmail.onmicrosoft.com
+05:58:07  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:58:07  INFO      shared.graph_client.graph_client  User created with ID: cc6974f1-d1d3-4c01-9146-ce0ca83ad0d9
+05:58:07  INFO      user_bot.flows.bulk_user_onboarding  Row 2: account created user_id=cc6974f1-d1d3-4c01-9146-ce0ca83ad0d9
+05:58:07  INFO      shared.graph_client.graph_client  Adding user cc6974f1-d1d3-4c01-9146-ce0ca83ad0d9 to group 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:58:08  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/75ab3c19-c4ad-40e7-8455-b5decb41d8da/members/$ref "HTTP/1.1 204 No Content"
+05:58:08  INFO      user_bot.flows.bulk_user_onboarding  Row 2: groups 1/1 assigned.
+05:58:08  INFO      shared.graph_client.graph_client  Assigning license f30db892-07e9-47e9-837c-80727f46fd3d to user cc6974f1-d1d3-4c01-9146-ce0ca83ad0d9
+05:58:09  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users/cc6974f1-d1d3-4c01-9146-ce0ca83ad0d9/assignLicense "HTTP/1.1 200 OK"
+05:58:09  INFO      user_bot.flows.bulk_user_onboarding  Row 2: license 'MICROSOFT FLOW FREE' assigned.
+05:58:09  INFO      user_bot.flows.bulk_user_onboarding  Row 2: status=completed duration=2.14s
+05:58:09  INFO      user_bot.flows.bulk_user_onboarding  Processing row 3/3: iambulkuser44@michaelkloudkrafthotmail.onmicrosoft.com
+05:58:09  INFO      shared.graph_client.graph_client  Creating user: iambulkuser44@michaelkloudkrafthotmail.onmicrosoft.com
+05:58:09  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+05:58:09  INFO      shared.graph_client.graph_client  User created with ID: bca24c08-bd60-4d61-9c53-71c5508209f7
+05:58:09  INFO      user_bot.flows.bulk_user_onboarding  Row 3: account created user_id=bca24c08-bd60-4d61-9c53-71c5508209f7
+05:58:09  INFO      shared.graph_client.graph_client  Adding user bca24c08-bd60-4d61-9c53-71c5508209f7 to group 12761bce-2c06-4cf0-8820-76342656e1b2
+05:58:10  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/12761bce-2c06-4cf0-8820-76342656e1b2/members/$ref "HTTP/1.1 204 No Content"
+05:58:10  INFO      shared.graph_client.graph_client  Adding user bca24c08-bd60-4d61-9c53-71c5508209f7 to group 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+05:58:11  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/75ab3c19-c4ad-40e7-8455-b5decb41d8da/members/$ref "HTTP/1.1 204 No Content"
+05:58:11  INFO      user_bot.flows.bulk_user_onboarding  Row 3: groups 2/2 assigned.
+05:58:11  INFO      user_bot.flows.bulk_user_onboarding  Row 3: status=completed duration=1.57s
+05:58:11  INFO      user_bot.flows.bulk_user_onboarding  Bulk user onboarding complete: total=3 completed=3 partial=0 failed=0 skipped=0 duration=4.40s dry_run=False
+05:58:11  INFO      folder_watcher  Bulk onboarding complete: total=3 completed=3 partial=0 failed=0 skipped=0 duration=4.40s
+05:58:11  INFO      folder_watcher  Results saved: Testing3_bulk_user_results_20260524_055811.csv
+05:58:11  INFO      folder_watcher  Original CSV moved to processed: Testing3_bulk_user_20260524_055811.csv
+05:58:11  INFO      folder_watcher  ✓ Successfully processed: Testing3_bulk_user.csv
+05:59:28  INFO      folder_watcher  Stopping watcher...
+05:59:28  INFO      folder_watcher  Folder watcher stopped.
+06:13:38  INFO      folder_watcher  Watched folders ready:
+06:13:38  INFO      folder_watcher    Inbox      : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+06:13:38  INFO      folder_watcher    Processing : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processing
+06:13:38  INFO      folder_watcher    Processed  : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_processed
+06:13:38  INFO      folder_watcher    Failed     : /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_failed
+06:13:38  INFO      folder_watcher  ============================================================
+06:13:38  INFO      folder_watcher  Folder watcher started.
+06:13:38  INFO      folder_watcher  Drop CSV files into: /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/watched_inbox
+06:13:38  INFO      folder_watcher  Press Ctrl+C to stop.
+06:13:38  INFO      folder_watcher  ============================================================
+06:13:52  INFO      folder_watcher  New CSV detected: Testing4_bulk_user.csv
+06:13:52  INFO      folder_watcher  Waiting 3s for file to settle: Testing4_bulk_user.csv
+06:13:55  INFO      folder_watcher  Starting pipeline for: Testing4_bulk_user.csv
+06:13:56  INFO      ai_engine._openai_client  OpenAI client: Azure (endpoint=https://kraft-cyber.cognitiveservices.azure.com/)
+06:13:56  INFO      ai_engine._openai_client  OpenAI client: Azure (endpoint=https://kraft-cyber.cognitiveservices.azure.com/)
+06:13:56  WARNING   ai_engine.orchestrator  SKIP_APPROVAL=true — approval gate is DISABLED. All flows will auto-execute. Never use this in production.
+06:13:56  INFO      folder_watcher  Moved to processing: Testing4_bulk_user.csv
+06:13:56  INFO      folder_watcher  Parsed 3 row(s) from 'Testing4_bulk_user.csv'.
+06:13:56  INFO      folder_watcher  Running pre-flight validation...
+06:13:56  INFO      msal.authority  Initializing with Entra authority: https://login.microsoftonline.com/5950e39e-81d1-45a1-8618-fe39a39b0448
+06:13:57  INFO      shared.graph_client.auth  Acquired new Graph API token. Expires in 3599s.
+06:13:57  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser45@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+06:13:57  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser46@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+06:13:57  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/users/iambulkuser47@michaelkloudkrafthotmail.onmicrosoft.com?%24select=id%2CdisplayName%2CuserPrincipalName%2CaccountEnabled%2CassignedLicenses%2Cdepartment%2CjobTitle "HTTP/1.1 404 Not Found"
+06:13:57  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onboarding-group%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+06:13:57  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onbaording-group-1%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+06:13:58  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/subscribedSkus?%24select=skuId%2CskuPartNumber%2CconsumedUnits%2CprepaidUnits "HTTP/1.1 200 OK"
+06:13:58  INFO      shared.graph_client.graph_client  License matched via friendly name map: 'MICROSOFT FLOW FREE' -> FLOW_FREE
+06:13:58  INFO      folder_watcher  Resolving names to IDs for 3 row(s) (0 skipped)...
+06:13:58  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onbaording-group-1%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+06:13:58  INFO      user_bot.triggers.csv_bulk_user_trigger  Group resolved: 'test-onbaording-group-1' -> 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+06:13:58  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/groups?%24filter=displayName%20eq%20%27test-onboarding-group%27&%24select=id%2CdisplayName "HTTP/1.1 200 OK"
+06:13:58  INFO      user_bot.triggers.csv_bulk_user_trigger  Group resolved: 'test-onboarding-group' -> 12761bce-2c06-4cf0-8820-76342656e1b2
+06:13:58  INFO      httpx  HTTP Request: GET https://graph.microsoft.com/v1.0/subscribedSkus?%24select=skuId%2CskuPartNumber%2CconsumedUnits%2CprepaidUnits "HTTP/1.1 200 OK"
+06:13:58  INFO      shared.graph_client.graph_client  License matched via friendly name map: 'MICROSOFT FLOW FREE' -> FLOW_FREE
+06:13:58  INFO      user_bot.triggers.csv_bulk_user_trigger  License resolved: 'MICROSOFT FLOW FREE' -> f30db892-07e9-47e9-837c-80727f46fd3d
+06:13:58  INFO      folder_watcher  Starting bulk onboarding for 3 user(s)...
+06:13:58  WARNING   shared.audit.audit_logger  AuditLogger: writing to local file /home/LabsKraft/.gemini/antigravity/scratch/agentic-iam/audit.jsonl
+06:13:58  INFO      user_bot.flows.bulk_user_onboarding  Bulk user onboarding started: 3 user(s) dry_run=False
+06:13:58  INFO      user_bot.flows.bulk_user_onboarding  Processing row 1/3: iambulkuser45@michaelkloudkrafthotmail.onmicrosoft.com
+06:13:58  INFO      shared.graph_client.graph_client  Creating user: iambulkuser45@michaelkloudkrafthotmail.onmicrosoft.com
+06:13:58  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+06:13:58  INFO      shared.graph_client.graph_client  User created with ID: e5e031b6-c2aa-497e-8986-e656dbcfc9b7
+06:13:58  INFO      user_bot.flows.bulk_user_onboarding  Row 1: account created user_id=e5e031b6-c2aa-497e-8986-e656dbcfc9b7
+06:13:58  INFO      shared.graph_client.graph_client  Adding user e5e031b6-c2aa-497e-8986-e656dbcfc9b7 to group 12761bce-2c06-4cf0-8820-76342656e1b2
+06:13:59  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/12761bce-2c06-4cf0-8820-76342656e1b2/members/$ref "HTTP/1.1 204 No Content"
+06:13:59  INFO      user_bot.flows.bulk_user_onboarding  Row 1: groups 1/1 assigned.
+06:13:59  INFO      user_bot.flows.bulk_user_onboarding  Row 1: status=completed duration=1.44s
+06:13:59  INFO      user_bot.flows.bulk_user_onboarding  Processing row 2/3: iambulkuser46@michaelkloudkrafthotmail.onmicrosoft.com
+06:13:59  INFO      shared.graph_client.graph_client  Creating user: iambulkuser46@michaelkloudkrafthotmail.onmicrosoft.com
+06:14:00  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+06:14:00  INFO      shared.graph_client.graph_client  User created with ID: fe0dd324-13a0-4fea-b94a-4b08964fc7c7
+06:14:00  INFO      user_bot.flows.bulk_user_onboarding  Row 2: account created user_id=fe0dd324-13a0-4fea-b94a-4b08964fc7c7
+06:14:00  INFO      shared.graph_client.graph_client  Adding user fe0dd324-13a0-4fea-b94a-4b08964fc7c7 to group 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+06:14:00  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/75ab3c19-c4ad-40e7-8455-b5decb41d8da/members/$ref "HTTP/1.1 204 No Content"
+06:14:00  INFO      user_bot.flows.bulk_user_onboarding  Row 2: groups 1/1 assigned.
+06:14:00  INFO      shared.graph_client.graph_client  Assigning license f30db892-07e9-47e9-837c-80727f46fd3d to user fe0dd324-13a0-4fea-b94a-4b08964fc7c7
+06:14:01  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users/fe0dd324-13a0-4fea-b94a-4b08964fc7c7/assignLicense "HTTP/1.1 200 OK"
+06:14:01  INFO      user_bot.flows.bulk_user_onboarding  Row 2: license 'MICROSOFT FLOW FREE' assigned.
+06:14:01  INFO      user_bot.flows.bulk_user_onboarding  Row 2: status=completed duration=1.21s
+06:14:01  INFO      user_bot.flows.bulk_user_onboarding  Processing row 3/3: iambulkuser47@michaelkloudkrafthotmail.onmicrosoft.com
+06:14:01  INFO      shared.graph_client.graph_client  Creating user: iambulkuser47@michaelkloudkrafthotmail.onmicrosoft.com
+06:14:01  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/users "HTTP/1.1 201 Created"
+06:14:01  INFO      shared.graph_client.graph_client  User created with ID: 49a4bacc-dd7d-4e3a-ac77-684450f108a8
+06:14:01  INFO      user_bot.flows.bulk_user_onboarding  Row 3: account created user_id=49a4bacc-dd7d-4e3a-ac77-684450f108a8
+06:14:01  INFO      shared.graph_client.graph_client  Adding user 49a4bacc-dd7d-4e3a-ac77-684450f108a8 to group 12761bce-2c06-4cf0-8820-76342656e1b2
+06:14:02  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/12761bce-2c06-4cf0-8820-76342656e1b2/members/$ref "HTTP/1.1 204 No Content"
+06:14:02  INFO      shared.graph_client.graph_client  Adding user 49a4bacc-dd7d-4e3a-ac77-684450f108a8 to group 75ab3c19-c4ad-40e7-8455-b5decb41d8da
+06:14:03  INFO      httpx  HTTP Request: POST https://graph.microsoft.com/v1.0/groups/75ab3c19-c4ad-40e7-8455-b5decb41d8da/members/$ref "HTTP/1.1 204 No Content"
+06:14:03  INFO      user_bot.flows.bulk_user_onboarding  Row 3: groups 2/2 assigned.
+06:14:03  INFO      user_bot.flows.bulk_user_onboarding  Row 3: status=completed duration=2.43s
+06:14:03  INFO      user_bot.flows.bulk_user_onboarding  Bulk user onboarding complete: total=3 completed=3 partial=0 failed=0 skipped=0 duration=5.09s dry_run=False
+06:14:03  INFO      folder_watcher  Bulk onboarding complete: total=3 completed=3 partial=0 failed=0 skipped=0 duration=5.09s
+06:14:03  INFO      folder_watcher  Results saved: Testing4_bulk_user_results_20260524_061403.csv
+06:14:03  INFO      folder_watcher  Original CSV moved to processed: Testing4_bulk_user_20260524_061403.csv
+06:14:03  INFO      folder_watcher  ✓ Successfully processed: Testing4_bulk_user.csv
+06:16:02  INFO      folder_watcher  Stopping watcher...
+06:16:02  INFO      folder_watcher  Folder watcher stopped.
+
+

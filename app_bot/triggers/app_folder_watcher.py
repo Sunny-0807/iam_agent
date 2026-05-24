@@ -14,14 +14,17 @@ Folder structure:
     watched_apps_failed/
 """
 
+
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+
 import asyncio
 import logging
 import os
 import shutil
-import sys
 import time
 from datetime import datetime
-from pathlib import Path
 
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env", override=False)
@@ -86,28 +89,51 @@ async def _process_csv(csv_path: Path) -> bool:
         decision = await run_decision_agent(analysis, "app", skip_approval=config.skip_approval)
         execution = await run_execution_agent(analysis, decision, "app")
 
-        # Save results
-        results_path = PROCESSED_DIR / f"{stem}_results_{_timestamp()}.csv"
-        results      = execution.summary or []
+        # ── Save enriched CSV — original columns + result columns ────────────
+        RESULT_COLS = ["status", "app_id", "cert_thumbprint", "duration_seconds", "error"]
+        results     = execution.summary or []
 
-        out = io.StringIO()
-        writer = _csv.DictWriter(out, fieldnames=[
-            "row", "display_name", "app_type", "status",
-            "app_id", "cert_thumbprint", "duration_seconds", "error",
-        ])
+        # Parse original CSV rows to get original columns
+        import csv as _csv2
+        orig_rows = list(_csv2.DictReader(io.StringIO(
+            processing_path.read_text(encoding="utf-8")
+        )))
+        original_fieldnames = list(orig_rows[0].keys()) if orig_rows else []
+        extra_cols          = [c for c in RESULT_COLS if c not in original_fieldnames]
+        all_fieldnames      = original_fieldnames + extra_cols
+
+        # Build lookup: display_name → result
+        result_map = {r.display_name.lower(): r for r in results}
+
+        out    = io.StringIO()
+        writer = _csv.DictWriter(out, fieldnames=all_fieldnames, extrasaction="ignore")
         writer.writeheader()
-        for r in results:
-            writer.writerow({
-                "row": r.row, "display_name": r.display_name,
-                "app_type": r.app_type, "status": r.status,
-                "app_id": r.app_id or "", "cert_thumbprint": r.cert_thumbprint or "",
-                "duration_seconds": r.duration_seconds, "error": r.error or "",
-            })
-        results_path.write_text(out.getvalue(), encoding="utf-8")
+        for orig_row in orig_rows:
+            out_row = dict(orig_row)
+            key     = orig_row.get("display_name", "").lower()
+            if key in result_map:
+                r = result_map[key]
+                out_row["status"]           = r.status
+                out_row["app_id"]           = r.app_id or ""
+                out_row["cert_thumbprint"]  = r.cert_thumbprint or ""
+                out_row["duration_seconds"] = r.duration_seconds
+                out_row["error"]            = r.error or ""
+            else:
+                out_row["status"]           = "unknown"
+                out_row["app_id"]           = ""
+                out_row["cert_thumbprint"]  = ""
+                out_row["duration_seconds"] = 0
+                out_row["error"]            = ""
+            writer.writerow(out_row)
 
-        dest = PROCESSED_DIR / f"{stem}_{_timestamp()}.csv"
-        shutil.move(str(processing_path), str(dest))
-        logger.info("Processed: %s → results: %s", dest.name, results_path.name)
+        enriched_path = PROCESSED_DIR / f"{stem}_{_timestamp()}.csv"
+        enriched_path.write_text(out.getvalue(), encoding="utf-8")
+
+        processing_path.unlink()
+        if csv_path.exists():
+            csv_path.unlink()
+            logger.info("Removed residual inbox copy: %s", csv_path.name)
+        logger.info("Enriched CSV saved to processed: %s", enriched_path.name)
         return True
 
     except Exception as exc:
@@ -150,13 +176,24 @@ class AppCSVHandler(FileSystemEventHandler):
         asyncio.run_coroutine_threadsafe(self._settle_and_process(path), self._loop)
 
     async def _settle_and_process(self, path: Path):
-        await asyncio.sleep(FILE_SETTLE_SECS)
-        if not path.exists() or path.stat().st_size == 0:
+        try:
+            await asyncio.sleep(FILE_SETTLE_SECS)
+            if not path.exists() or path.stat().st_size == 0:
+                return
+            logger.info("Starting pipeline for: %s", path.name)
+            success = await _process_csv(path)
+            if success:
+                logger.info("✓ Successfully processed: %s", path.name)
+            else:
+                logger.error("✗ Failed — check watched_apps_failed/: %s", path.name)
+        except Exception as exc:
+            import traceback
+            logger.error(
+                "Unhandled exception processing '%s': %s\n%s",
+                path.name, exc, traceback.format_exc(),
+            )
+        finally:
             self._seen.discard(str(path))
-            return
-        success = await _process_csv(path)
-        self._seen.discard(str(path))
-        logger.info("✓ Processed" if success else "✗ Failed — check watched_apps_failed/")
 
 
 def run_watcher():
