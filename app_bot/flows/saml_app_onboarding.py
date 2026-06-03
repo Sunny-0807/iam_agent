@@ -7,10 +7,6 @@ from shared.models import AppType, FlowName, FlowStatus, SAMLAppOnboardingReques
 
 logger = logging.getLogger(__name__)
 
-# Microsoft's standard non-gallery app template ID
-# Used when creating a custom enterprise app with SAML SSO
-NON_GALLERY_TEMPLATE_ID = "8adf8e6e-67b2-4cf2-a259-e3dc5476c621"
-
 
 async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
     """
@@ -27,21 +23,13 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
 
     Non-gallery app flow (app_type=non_gallery):
         1. Create app registration
-        2. Create service principal
+        2. Create service principal (with propagation retry)
         3. Set SSO mode to SAML
         4. Set SAML URLs
         5. Generate SAML signing certificate
         6. Assign groups
         7. Add owner
         8. Audit log
-
-    Steps 2-7 are identical for both types — only Step 1 differs.
-
-    Args:
-        request: Validated SAMLAppOnboardingRequest.
-
-    Returns:
-        dict with app details, SAML config summary, and certificate thumbprint.
     """
     client = GraphClient()
     audit  = AuditLogger()
@@ -53,19 +41,12 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
     )
 
     try:
-        # ── Step 1: Create app — path differs by type ─────────────────────────
+        # ── Step 1: Create app registration + service principal ───────────────
         object_id, app_id, sp_id = await _create_app(
             client, request, graph_ops
         )
 
         # ── Step 2: Set SSO mode to SAML ──────────────────────────────────────
-        # Small safety wait for gallery apps where SP is returned immediately
-        # but may still not be fully propagated.
-        import asyncio as _asyncio
-        if request.app_type.value == "gallery":
-            logger.info("Gallery app: waiting 5s for SP propagation before SAML config...")
-            await _asyncio.sleep(5)
-
         await client.set_saml_sso_mode(sp_id)
         graph_ops.append(
             f"PATCH /servicePrincipals/{sp_id} (preferredSingleSignOnMode=saml)"
@@ -76,6 +57,7 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
         await client.set_saml_urls(
             object_id=object_id,
             sp_id=sp_id,
+            app_id=app_id,
             entity_id=request.entity_id,
             reply_url=request.reply_url,
             sign_on_url=request.sign_on_url,
@@ -103,10 +85,8 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
         )
 
         # ── Step 5: Assign groups ─────────────────────────────────────────────
-        # Resolve group display names to object IDs before assigning.
-        # Names that cannot be resolved are skipped and logged as warnings.
-        groups_assigned   = 0
-        groups_not_found  = []
+        groups_assigned  = 0
+        groups_not_found = []
 
         for group_name in request.assigned_group_names:
             group_name = group_name.strip()
@@ -136,7 +116,6 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
             )
 
         # ── Step 6: Add owner ─────────────────────────────────────────────────
-        # Resolve owner UPN to object ID before adding.
         owner_id: str | None = None
         if request.owner_upn:
             try:
@@ -144,9 +123,13 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
                 owner_id   = owner_user["id"]
                 await client.add_application_owner(object_id, owner_id)
                 graph_ops.append(
-                    f"POST /applications/{object_id}/owners/$ref (owner={request.owner_upn})"
+                    f"POST /applications/{object_id}/owners/$ref "
+                    f"(owner={request.owner_upn})"
                 )
-                logger.info("Owner '%s' (id=%s) added to application.", request.owner_upn, owner_id)
+                logger.info(
+                    "Owner '%s' (id=%s) added to application.",
+                    request.owner_upn, owner_id,
+                )
             except Exception as exc:
                 logger.warning(
                     "Could not resolve or add owner '%s': %s — proceeding without owner.",
@@ -160,19 +143,19 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
             principal_id=object_id,
             requested_by=request.requested_by,
             details={
-                "display_name":       request.display_name,
-                "app_type":           request.app_type.value,
-                "app_id":             app_id,
-                "object_id":          object_id,
+                "display_name":         request.display_name,
+                "app_type":             request.app_type.value,
+                "app_id":               app_id,
+                "object_id":            object_id,
                 "service_principal_id": sp_id,
-                "entity_id":          request.entity_id,
-                "reply_url":          request.reply_url,
-                "sign_on_url":        request.sign_on_url,
-                "cert_thumbprint":    cert_thumbprint,
-                "cert_expiry":        cert_expiry,
-                "groups_assigned":    groups_assigned,
-                "groups_not_found":  groups_not_found,
-                "source":             request.source,
+                "entity_id":            request.entity_id,
+                "reply_url":            request.reply_url,
+                "sign_on_url":          request.sign_on_url,
+                "cert_thumbprint":      cert_thumbprint,
+                "cert_expiry":          cert_expiry,
+                "groups_assigned":      groups_assigned,
+                "groups_not_found":     groups_not_found,
+                "source":               request.source,
             },
             graph_operations=graph_ops,
         )
@@ -210,10 +193,11 @@ async def run_saml_app_onboarding(request: SAMLAppOnboardingRequest) -> dict:
             requested_by=request.requested_by,
             error=exc,
             details={
-                "display_name":       request.display_name,
-                "app_type":           request.app_type.value,
+                "display_name":        request.display_name,
+                "app_type":            request.app_type.value,
                 "graph_ops_completed": graph_ops,
-            },        )
+            },
+        )
         raise
 
 
@@ -229,7 +213,7 @@ async def _create_app(
     Returns (object_id, app_id, sp_id).
 
     Gallery     : single API call via applicationTemplates/{id}/instantiate
-    Non-gallery : two separate API calls (POST /applications + POST /servicePrincipals)
+    Non-gallery : POST /applications then POST /servicePrincipals
     """
     if request.app_type == AppType.GALLERY:
         return await _create_gallery_app(client, request, graph_ops)
@@ -280,11 +264,11 @@ async def _create_non_gallery_app(
     graph_ops: list[str],
 ) -> tuple[str, str, str]:
     """
-    Non-gallery app — create app registration then service principal separately.
+    Non-gallery app — create app registration then service principal.
 
     Entra ID has eventual consistency — after POST /applications, the appId
-    is not immediately visible to POST /servicePrincipals. We wait briefly
-    and retry with exponential backoff to handle this propagation delay.
+    is not immediately visible to POST /servicePrincipals. We wait and retry
+    with exponential backoff to handle this propagation delay.
     """
     import asyncio
 
@@ -292,7 +276,7 @@ async def _create_non_gallery_app(
         "Non-gallery app: creating registration for '%s'", request.display_name
     )
 
-    # Create app registration
+    # Step 1a: Create app registration
     app = await client.create_application({
         "displayName":    request.display_name,
         "signInAudience": "AzureADMyOrg",
@@ -307,21 +291,17 @@ async def _create_non_gallery_app(
         object_id, app_id,
     )
 
-    # ── Step 2: Create service principal with propagation retry ─────────────
-    # Entra ID is eventually consistent. After POST /applications, the appId
-    # may not yet be visible on all directory replicas, causing POST
-    # /servicePrincipals to return 400. After SP creation, a GET is used
-    # to confirm the SP is fully reachable before returning — preventing
-    # 404 errors on subsequent PATCH/POST calls that use the SP ID.
+    # Step 1b: Create service principal — retry on propagation delay
+    # appId may not be visible to /servicePrincipals immediately.
+    # Retry: 3s → 6s → 12s (max 3 attempts, 21s total worst case)
     sp_id    = None
     last_exc = None
+    delays   = [3, 6, 12]
 
-    # Phase A: Create the service principal (retry on 400 propagation errors)
-    sp_create_delays = [5, 10, 15]
-    for attempt, delay in enumerate(sp_create_delays, start=1):
+    for attempt, delay in enumerate(delays, start=1):
         logger.info(
-            "SP creation attempt %d/%d — waiting %ds for appId propagation...",
-            attempt, len(sp_create_delays), delay,
+            "SP creation attempt %d/%d — waiting %ds for propagation...",
+            attempt, len(delays), delay,
         )
         await asyncio.sleep(delay)
         try:
@@ -335,8 +315,7 @@ async def _create_non_gallery_app(
                 "SP creation attempt %d failed: %s — %s",
                 attempt, type(exc).__name__, exc,
             )
-            if attempt == len(sp_create_delays):
-                # All retries exhausted — clean up orphaned app registration
+            if attempt == len(delays):
                 logger.error(
                     "All SP creation attempts failed. "
                     "Cleaning up orphaned app registration objectId=%s.", object_id,
@@ -346,43 +325,15 @@ async def _create_non_gallery_app(
                     logger.info("Orphaned app registration deleted: %s", object_id)
                 except Exception as cleanup_exc:
                     logger.error(
-                        "Failed to clean up orphaned app %s: %s",
+                        "Failed to delete orphaned app registration %s: %s",
                         object_id, cleanup_exc,
                     )
                 raise last_exc
 
-    # Phase B: Confirm SP is reachable before returning
-    # Even after creation succeeds, subsequent PATCH/POST calls on the SP
-    # can return 404 if the SP hasn't propagated across all replicas yet.
-    # We verify with a GET and retry until reachable.
-    sp_verify_delays = [4, 6, 8, 10]
-    sp_reachable     = False
-    for attempt, delay in enumerate(sp_verify_delays, start=1):
-        logger.info(
-            "SP reachability check %d/%d — waiting %ds...",
-            attempt, len(sp_verify_delays), delay,
-        )
-        await asyncio.sleep(delay)
-        try:
-            await client._get(f"servicePrincipals/{sp_id}",
-                              params={"$select": "id,appId"})
-            sp_reachable = True
-            logger.info("SP %s confirmed reachable after %d attempt(s).", sp_id, attempt)
-            break
-        except Exception as exc:
-            logger.warning(
-                "SP reachability check %d failed: %s", attempt, exc
-            )
-            if attempt == len(sp_verify_delays):
-                logger.error(
-                    "SP %s not reachable after all checks. "
-                    "Proceeding anyway — subsequent steps may retry.", sp_id,
-                )
-
     graph_ops.append(f"POST /servicePrincipals -> spId={sp_id}")
     logger.info(
-        "Non-gallery app fully ready: objectId=%s appId=%s spId=%s reachable=%s",
-        object_id, app_id, sp_id, sp_reachable,
+        "Non-gallery app created: objectId=%s appId=%s spId=%s",
+        object_id, app_id, sp_id,
     )
     return object_id, app_id, sp_id
 

@@ -1,0 +1,2 @@
+display_name,app_type,entity_id,reply_url,owner_upn,template_id,sign_on_url,assigned_group_names,status,app_id,cert_thumbprint,duration_seconds,error
+IAM Showcase SP Test,non_gallery,https://sptest.iamshowcase.com/,https://sptest.iamshowcase.com/acs,iam.yashgabra@michaelkloudkrafthotmail.onmicrosoft.com,,https://sptest.iamshowcase.com/,,failed,,,1.39,Graph resource not found: 'https://graph.microsoft.com/v1.0/applications/de43a399-9e65-46fb-a6d5-d1023c80310a'

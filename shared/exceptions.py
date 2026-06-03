@@ -40,8 +40,19 @@ class RiskScoringError(IAMBaseError):
     """Raised when risk scoring fails for a security alert."""
 
 
-class ResourceNotFoundError(IAMBaseError):
-    """Raised when a user or application is not found in Entra ID."""
+class ResourceNotFoundError(GraphAPIError):
+    """
+    Raised when a Graph API resource returns 404.
+
+    Inherits from GraphAPIError so tenacity retry decorators
+    (retry_if_exception_type(GraphAPIError)) automatically catch and
+    retry transient 404s caused by Entra ID replication lag.
+    """
 
     def __init__(self, resource_type: str, identifier: str):
-        super().__init__(f"{resource_type} not found: '{identifier}'")
+        super().__init__(
+            f"{resource_type} not found: '{identifier}'",
+            status_code=404,
+            endpoint=identifier,
+        )
+

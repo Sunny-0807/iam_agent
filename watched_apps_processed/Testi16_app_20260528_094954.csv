@@ -1,0 +1,2 @@
+display_name,app_type,template_id,entity_id,reply_url,sign_on_url,owner_upn,assigned_group_names,status,app_id,cert_thumbprint,duration_seconds,error
+My AWS App,gallery,8b1025e4-1dd2-430b-a150-2ef79cd700f5,https://signin.aws.amazon.com/saml,https://signin.aws.amazon.com/saml,,iam.yashgabra@michaelkloudkrafthotmail.onmicrosoft.com,,completed,b27d50e0-1523-415e-84c6-a11a3d3e0bf4,ABA32A0A03A2932C3C7F274D7B407C2697ADCE30,16.97,

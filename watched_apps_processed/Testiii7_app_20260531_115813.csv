@@ -1,0 +1,4 @@
+display_name,app_type,template_id,entity_id,reply_url,sign_on_url,owner_upn,assigned_group_names,status,app_id,cert_thumbprint,duration_seconds,error
+SAMP SP Test,non_gallery,,https://samlsp.com/,https://samlsp.com/acs,https://samlsp.com/,iam.yashgabra@michaelkloudkrafthotmail.onmicrosoft.com,,completed,731f5c47-47f0-4895-aa8c-55ae816f0509,94C6CCE0C683B046AFCFD168CA845027EBFBD754,13.51,
+My AWS App,gallery,8b1025e4-1dd2-430b-a150-2ef79cd700f5,https://signin.aws.amazon.com/saml,https://signin.aws.amazon.com/saml,,iam.yashgabra@michaelkloudkrafthotmail.onmicrosoft.com,,completed,15ce346d-5b8e-48a7-9598-d88c2cec02c4,B64BB1BA08210ED059E3F2E03D87335A97805D41,10.4,
+JumpCloud SP Test,non_gallery,,https://sso.jumpcloud.com/saml2/testapp,https://sso.jumpcloud.com/saml2/testapp,https://sso.jumpcloud.com/saml2/testapp,iam.yashgabra@michaelkloudkrafthotmail.onmicrosoft.com,,completed,eb4e8431-fdee-451e-9731-9e01d7bf5a64,F92D477FAF0538D10E330818AC8D39E4E4CF22F1,19.21,

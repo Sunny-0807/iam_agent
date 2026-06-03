@@ -115,8 +115,14 @@ class PolicyEngine:
             raise PolicyViolationError(
                 "App offboarding requires a reason of at least 5 characters."
             )
-        if not request.object_id or not request.service_principal_id:
+        if not request.object_id:
             raise PolicyViolationError(
-                "App offboarding requires both object_id and service_principal_id."
+                "App offboarding requires object_id (app registration ID)."
+            )
+        if not request.service_principal_id:
+            logger.info(
+                "App offboarding: no service_principal_id provided — "
+                "SP may already be deleted. Proceeding with app registration cleanup only."
             )
         logger.debug("App offboarding policy passed for app_id: %s", request.app_id)
+

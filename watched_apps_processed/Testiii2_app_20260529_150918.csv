@@ -1,0 +1,2 @@
+display_name,app_type,template_id,entity_id,reply_url,sign_on_url,owner_upn,assigned_group_names,status,app_id,cert_thumbprint,duration_seconds,error
+Authentik SP Test,non_gallery,,https://authentik.company/saml/sp,https://authentik.company/source/saml/<slug>/acs/,https://authentik.company/,iam.yashgabra@michaelkloudkrafthotmail.onmicrosoft.com,,completed,ed856e70-7be1-4155-93bf-b8b087c549cd,FB387D6E5A1F9A72C6FF7DAD103E6BAEE6F0EEA2,19.0,

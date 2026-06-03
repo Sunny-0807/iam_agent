@@ -100,6 +100,19 @@ class GraphClient:
         logger.debug("%s %s → %d", method, url, response.status_code)
 
         if response.status_code == 404:
+            # Log the full response body — Graph API includes specific error codes
+            # that distinguish replication lag from genuine not-found
+            _body_404 = {}
+            try:
+                _body_404 = response.json() if response.content else {}
+            except Exception:
+                pass
+            _code_404 = _body_404.get("error", {}).get("code", "unknown")
+            _msg_404  = _body_404.get("error", {}).get("message", "no message")
+            logger.warning(
+                "404 on %s %s — code=%s message=%s",
+                method, url, _code_404, _msg_404,
+            )
             raise ResourceNotFoundError("Graph resource", url)
 
         if response.status_code == 429:
@@ -413,81 +426,247 @@ class GraphClient:
         )
         return result
 
-    async def set_saml_sso_mode(self, sp_id: str) -> None:
+    async def set_saml_sso_mode(
+        self,
+        sp_id: str,
+        entity_id: str | None = None,
+        reply_url: str | None = None,
+        sign_on_url: str | None = None,
+    ) -> None:
         """
         PATCH /servicePrincipals/{id}
-        Sets the SSO mode to SAML on the service principal.
-        Must be called before configuring SAML URLs or generating a certificate.
+        Sets SSO mode to SAML AND all SAML URLs in ONE single PATCH call.
+
+        Combining everything into one call eliminates the load-balancer problem
+        where consecutive PATCHes on the same SP hit different backend replicas.
+        One request = one server = consistent result.
+
+        Fields set:
+          preferredSingleSignOnMode = "saml"
+          replyUrls                 = [reply_url]   (ACS URL)
+          samlMetadataUrl           = entity_id      (real SAML Entity ID)
+          loginUrl                  = sign_on_url    (optional)
         """
-        logger.info("Setting SAML SSO mode for SP: %s", sp_id)
-        await self._patch(
-            f"servicePrincipals/{sp_id}",
-            {"preferredSingleSignOnMode": "saml"},
+        import asyncio as _aio
+        sp_patch: dict = {"preferredSingleSignOnMode": "saml"}
+        if reply_url:
+            sp_patch["replyUrls"] = [reply_url]
+        if entity_id:
+            sp_patch["samlMetadataUrl"] = entity_id
+        if sign_on_url:
+            sp_patch["loginUrl"] = sign_on_url
+
+        logger.info(
+            "Setting SAML SSO mode + URLs for SP %s — entity_id=%s reply_url=%s",
+            sp_id, entity_id, reply_url,
         )
+        _delays = [0, 5, 10, 15, 20, 25, 30]
+        for _i, _d in enumerate(_delays, 1):
+            if _d:
+                logger.info("set_saml_sso_mode retry %d/%d — waiting %ds...", _i, len(_delays), _d)
+                await _aio.sleep(_d)
+            try:
+                await self._patch(f"servicePrincipals/{sp_id}", sp_patch)
+                logger.info(
+                    "SAML SSO mode + URLs set in one PATCH (attempt %d)", _i
+                )
+                return
+            except Exception as _exc:
+                logger.warning("set_saml_sso_mode attempt %d failed: %s", _i, _exc)
+                if _i == len(_delays):
+                    raise
 
     async def set_saml_urls(
         self,
         object_id: str,
         sp_id: str,
+        app_id: str,
         entity_id: str,
         reply_url: str,
         sign_on_url: str | None = None,
     ) -> None:
         """
-        PATCH /applications/{id}  +  PATCH /servicePrincipals/{id}
-        Sets the SAML basic configuration:
-            - Entity ID (Identifier)   -> identifierUris on app registration
-            - Reply URL (ACS URL)      -> replyUrls on app + web.redirectUris
-            - Sign-on URL (optional)   -> on service principal
+        PATCH /applications/{id} only.
 
-        Both the app registration and service principal need to be updated
-        for the config to reflect correctly in the Entra ID portal.
+        The SP PATCH (replyUrls, samlMetadataUrl, loginUrl, preferredSingleSignOnMode)
+        is now done in set_saml_sso_mode() as a single combined call to avoid
+        the Graph API load-balancer routing consecutive SP PATCHes to different
+        backend replicas (which caused persistent 404s).
+
+        This method only patches the app registration:
+          identifierUris = api://<appId>
+          web.redirectUris = [reply_url]
         """
         logger.info(
-            "Setting SAML URLs for app objectId=%s entity_id=%s reply_url=%s",
-            object_id, entity_id, reply_url,
+            "Patching app registration: objectId=%s appId=%s reply_url=%s",
+            object_id, app_id, reply_url,
         )
-
-        # Update app registration
-        app_patch: dict[str, Any] = {
-            "identifierUris": [entity_id],
+        await self._patch(f"applications/{object_id}", {
+            "identifierUris": [f"api://{app_id}"],
             "web": {
                 "redirectUris": [reply_url],
             },
-        }
-        await self._patch(f"applications/{object_id}", app_patch)
+        })
+        logger.info("App registration patched: identifierUris=api://%s", app_id)
 
-        # Update service principal with login URL if provided
+    async def _batch(self, requests: list[dict]) -> list[dict]:
+        """
+        POST https://graph.microsoft.com/v1.0/$batch
+        Sends multiple Graph API requests in one HTTP call.
+        All requests hit the same backend server — eliminates load-balancer 404s.
+        """
+        import json as _json
+        logger.info("Sending $batch with %d requests...", len(requests))
+        url = f"{self._base_url}/$batch"
+        async with httpx.AsyncClient(timeout=60) as client:
+            response = await client.post(url, headers=self._headers(), json={"requests": requests})
+        if response.status_code not in (200, 201):
+            error_body = response.json() if response.content else {}
+            error_msg  = error_body.get("error", {}).get("message", response.text)
+            raise GraphAPIError(error_msg, status_code=response.status_code, endpoint=url)
+        responses = response.json().get("responses", [])
+        logger.info("$batch completed — %d responses.", len(responses))
+        return responses
+
+    async def configure_saml_app(
+        self,
+        object_id: str,
+        sp_id: str,
+        app_id: str,
+        entity_id: str,
+        reply_url: str,
+        sign_on_url: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Configures a SAML app in ONE $batch call — all on the same backend server.
+
+        Batch requests:
+          1: PATCH /servicePrincipals/{sp_id}  — SSO mode + replyUrls + samlMetadataUrl
+          2: PATCH /applications/{object_id}   — identifierUris + redirectUris
+          3: POST  /servicePrincipals/{sp_id}/addTokenSigningCertificate (dependsOn 1)
+
+        Returns the cert object from request 3.
+        Retries the full batch on any failure — still one HTTP call per retry.
+        """
+        import asyncio as _aio
+
+        logger.info(
+            "configure_saml_app $batch: sp_id=%s object_id=%s entity_id=%s reply_url=%s",
+            sp_id, object_id, entity_id, reply_url,
+        )
+
+        sp_body: dict = {
+            "preferredSingleSignOnMode": "saml",
+            "replyUrls":                [reply_url],
+            "samlMetadataUrl":           entity_id,
+        }
         if sign_on_url:
-            await self._patch(
-                f"servicePrincipals/{sp_id}",
-                {"loginUrl": sign_on_url},
-            )
+            sp_body["loginUrl"] = sign_on_url
+
+        batch_reqs = [
+            {
+                "id": "1", "method": "PATCH",
+                "url": f"/servicePrincipals/{sp_id}",
+                "headers": {"Content-Type": "application/json"},
+                "body": sp_body,
+            },
+            {
+                "id": "2", "method": "PATCH",
+                "url": f"/applications/{object_id}",
+                "headers": {"Content-Type": "application/json"},
+                "body": {
+                    "identifierUris": [f"api://{app_id}"],
+                    "web": {"redirectUris": [reply_url]},
+                },
+            },
+            {
+                "id": "3", "method": "POST",
+                "url": f"/servicePrincipals/{sp_id}/addTokenSigningCertificate",
+                "dependsOn": ["1"],
+                "headers": {"Content-Type": "application/json"},
+                "body": {
+                    "displayName": "CN=SAML Signing Certificate",
+                    "endDateTime": _cert_expiry_date(),
+                },
+            },
+        ]
+
+        _delays = [0, 15, 30, 45, 60]
+        last_exc = None
+        for attempt, delay in enumerate(_delays, 1):
+            if delay:
+                logger.info("configure_saml_app retry %d/%d — waiting %ds...",
+                            attempt, len(_delays), delay)
+                await _aio.sleep(delay)
+            try:
+                responses = await self._batch(batch_reqs)
+                errors = []
+                cert   = None
+                for r in responses:
+                    rid    = r.get("id")
+                    status = r.get("status", 0)
+                    body   = r.get("body", {})
+                    if status in (200, 201, 204):
+                        logger.info("Batch req %s — OK (status %d)", rid, status)
+                        if rid == "3":
+                            cert = body
+                    else:
+                        err_msg  = body.get("error", {}).get("message", str(body))
+                        err_code = body.get("error", {}).get("code", "unknown")
+                        logger.warning("Batch req %s failed — %d %s: %s",
+                                       rid, status, err_code, err_msg)
+                        errors.append(f"req{rid}:[{status}]{err_code}:{err_msg}")
+                if errors:
+                    raise GraphAPIError(
+                        f"$batch errors: {'; '.join(errors)}",
+                        status_code=400, endpoint="$batch",
+                    )
+                if not cert:
+                    raise GraphAPIError(
+                        "No cert returned from batch req 3",
+                        status_code=500, endpoint="$batch",
+                    )
+                logger.info("configure_saml_app succeeded: thumbprint=%s",
+                            cert.get("thumbprint", ""))
+                return cert
+            except GraphAPIError as exc:
+                last_exc = exc
+                logger.warning("configure_saml_app attempt %d failed: %s", attempt, exc)
+                if attempt == len(_delays):
+                    raise
+        raise last_exc
 
     async def add_token_signing_certificate(self, sp_id: str) -> dict[str, Any]:
         """
         POST /servicePrincipals/{id}/addTokenSigningCertificate
         Auto-generates a self-signed SAML token signing certificate.
-        Entra ID uses this certificate to sign SAML assertions sent to the SP.
-
-        Returns the certificate object including:
-            - thumbprint   : used to identify the certificate
-            - endDateTime  : certificate expiry (3 years by default)
-            - keyId        : unique ID of the key credential
+        Retries on 404 — same load balancer issue as set_saml_sso_mode.
         """
+        import asyncio as _aio3
         logger.info("Generating SAML signing certificate for SP: %s", sp_id)
-        result = await self._post(
-            f"servicePrincipals/{sp_id}/addTokenSigningCertificate",
-            {
-                "displayName": "CN=SAML Signing Certificate",
-                "endDateTime": _cert_expiry_date(),
-            },
-        )
-        logger.info(
-            "SAML certificate generated: thumbprint=%s expiry=%s",
-            result.get("thumbprint"), result.get("endDateTime"),
-        )
-        return result
+        _delays = [0, 5, 10, 15, 20, 25, 30]
+        for _i, _d in enumerate(_delays, 1):
+            if _d:
+                logger.info("addTokenSigningCertificate retry %d/%d — waiting %ds...",
+                            _i, len(_delays), _d)
+                await _aio3.sleep(_d)
+            try:
+                result = await self._post(
+                    f"servicePrincipals/{sp_id}/addTokenSigningCertificate",
+                    {
+                        "displayName": "CN=SAML Signing Certificate",
+                        "endDateTime": _cert_expiry_date(),
+                    },
+                )
+                logger.info(
+                    "SAML certificate generated (attempt %d): thumbprint=%s expiry=%s",
+                    _i, result.get("thumbprint"), result.get("endDateTime"),
+                )
+                return result
+            except Exception as _exc:
+                logger.warning("addTokenSigningCertificate attempt %d failed: %s", _i, _exc)
+                if _i == len(_delays):
+                    raise
 
     async def assign_group_to_app(
         self, sp_id: str, group_id: str
@@ -507,7 +686,7 @@ class GraphClient:
         return await self._post(
             f"servicePrincipals/{sp_id}/appRoleAssignments", payload
         )
-    
+
 
     # =========================================================================
     # RESOLVER METHODS — groups and licenses
@@ -675,24 +854,6 @@ class GraphClient:
     # SEARCH METHODS
     # =========================================================================
 
-    async def search_users(self, query: str) -> list[dict]:
-        """
-        GET /users?$search="displayName:{query}" OR "userPrincipalName:{query}"
-        Searches users by display name or UPN prefix.
-        Returns up to 10 matching users with id, displayName, userPrincipalName.
-        Requires ConsistencyLevel: eventual header (already set in _headers).
-        """
-        result = await self._get(
-            "users",
-            params={
-                "$search":  f'"displayName:{query}" OR "userPrincipalName:{query}"',
-                "$select":  "id,displayName,userPrincipalName",
-                "$top":     "10",
-                # "$orderby": "displayName",
-            },
-        )
-        return result.get("value", [])
-
     async def search_applications(self, query: str) -> list[dict]:
         """
         GET /applications?$search="displayName:{query}"
@@ -745,38 +906,7 @@ class GraphClient:
             },
         )
         return result.get("value", [])
-
-    async def search_applications(self, query: str) -> list[dict]:
-        """
-        GET /applications?$search="displayName:{query}"
-        Searches app registrations by display name, then resolves the
-        service principal ID for each result.
-        Returns list of {object_id, app_id, display_name, service_principal_id}.
-        """
-        if not query or len(query.strip()) < 2:
-            return []
-
-        result = await self._get(
-            "applications",
-            params={
-                "$search": f'"displayName:{query}"',
-                "$select": "id,appId,displayName",
-                "$top":    "15",
-            },
-        )
-        apps = result.get("value", [])
-
-        resolved = []
-        for app in apps:
-            sp_id = await self._resolve_sp_id(app["appId"])
-            resolved.append({
-                "object_id":            app["id"],
-                "app_id":               app["appId"],
-                "display_name":         app["displayName"],
-                "service_principal_id": sp_id or "",
-            })
-        return resolved
-
+    
     async def _resolve_sp_id(self, app_id: str) -> str | None:
         """
         GET /servicePrincipals?$filter=appId eq '{app_id}'
@@ -795,6 +925,7 @@ class GraphClient:
             return sps[0]["id"] if sps else None
         except Exception:
             return None
+
 
     async def set_manager(self, user_id: str, manager_id: str) -> None:
         """
@@ -822,7 +953,6 @@ class GraphClient:
             {"tags": ["WindowsAzureActiveDirectoryIntegratedApp"]},
         )
         logger.info("SP %s tagged as enterprise app successfully.", sp_id)
-        
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -832,7 +962,6 @@ def _cert_expiry_date() -> str:
     from datetime import datetime, timezone, timedelta
     expiry = datetime.now(timezone.utc) + timedelta(days=3 * 365)
     return expiry.strftime("%Y-%m-%dT%H:%M:%SZ")
-
 
 # ── License name helpers ──────────────────────────────────────────────────────
 
@@ -852,9 +981,11 @@ def _normalise_sku(s: str) -> str:
     return s
 
 
+
 # Map of human-friendly license display names to their skuPartNumber codes.
 # Keys are UPPERCASED for case-insensitive lookup.
 # Add entries here as needed for licenses in your tenant.
+
 _FRIENDLY_NAME_TO_SKU: dict[str, str] = {
     # Power Platform
     "MICROSOFT POWER AUTOMATE FREE":          "FLOW_FREE",
@@ -917,4 +1048,3 @@ _FRIENDLY_NAME_TO_SKU: dict[str, str] = {
     "MICROSOFT TEAMS EXPLORATORY":            "TEAMS_EXPLORATORY",
     "MICROSOFT TEAMS ROOMS PRO":              "MTR_PREM",
 }
-

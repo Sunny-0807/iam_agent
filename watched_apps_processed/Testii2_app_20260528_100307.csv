@@ -1,0 +1,2 @@
+display_name,app_type,template_id,entity_id,reply_url,sign_on_url,owner_upn,assigned_group_names,status,app_id,cert_thumbprint,duration_seconds,error
+SAML SP Test,non_gallery,,https://samlsp.com/,https://samlsp.com/acs,https://samlsp.com/,iam.yashgabra@michaelkloudkrafthotmail.onmicrosoft.com,,completed,256a3fd0-c836-45b3-ab2a-dc6b9ecce298,DA74F918B554E7B8A601C46A0482FB9B347E780D,19.58,

@@ -530,36 +530,42 @@ with tab_pipeline:
 with tab_offboard:
     st.subheader("Offboard an existing user")
     with st.form("offboard_form"):
-        off_uid    = st.text_input("User object ID *")
-        off_upn    = st.text_input("UPN *")
-        off_reason = st.text_area("Reason *")
+        off_upn    = st.text_input("User UPN *", placeholder="jane@yourdomain.com")
+        off_reason = st.text_area("Reason *", placeholder="Employee resigned")
         off_sub    = st.form_submit_button("🗑 Offboard User", type="primary")
 
     if off_sub:
         errors = []
-        if not off_uid:    errors.append("User object ID is required.")
         if not off_upn:    errors.append("UPN is required.")
         if not off_reason or len(off_reason.strip()) < 5:
             errors.append("Reason must be at least 5 characters.")
         for e in errors: st.error(e)
         if not errors:
             from user_bot.triggers.admin_portal import handle_admin_request
-            with st.spinner("Running offboarding..."):
+            with st.spinner("Looking up user..."):
                 try:
-                    state = asyncio.run(handle_admin_request({
-                        "action": "offboard_user", "requested_by": "streamlit_admin",
-                        "payload": {
-                            "user_id": off_uid, "user_principal_name": off_upn,
-                            "reason": off_reason, "revoke_sessions": True,
-                            "remove_licenses": True, "remove_group_memberships": True,
-                        },
-                    }))
-                    s = state.get("status")
-                    if s == "completed":   st.success("✅ Offboarded successfully."); st.json(state.get("result", {}))
-                    elif s == "escalated": st.warning("⏳ Escalated for approval.")
-                    else:                  st.error(f"Unexpected status: {s}")
+                    u       = asyncio.run(client.get_user_by_upn(off_upn))
+                    off_uid = u["id"]
                 except Exception as exc:
-                    st.error(f"Error: {exc}")
+                    st.error(f"User not found: {exc}")
+                    off_uid = None
+            if off_uid:
+                with st.spinner("Running offboarding..."):
+                    try:
+                        state = asyncio.run(handle_admin_request({
+                            "action": "offboard_user", "requested_by": "streamlit_admin",
+                            "payload": {
+                                "user_id": off_uid, "user_principal_name": off_upn,
+                                "reason": off_reason, "revoke_sessions": True,
+                                "remove_licenses": True, "remove_group_memberships": True,
+                            },
+                        }))
+                        s = state.get("status")
+                        if s == "completed":   st.success("✅ Offboarded successfully."); st.json(state.get("result", {}))
+                        elif s == "escalated": st.warning("⏳ Escalated for approval.")
+                        else:                  st.error(f"Unexpected status: {s}")
+                    except Exception as exc:
+                        st.error(f"Error: {exc}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -569,38 +575,44 @@ with tab_isolate:
     st.subheader("Isolate a compromised user")
     st.warning("Immediately disables account, revokes sessions, forces password reset.", icon="⚠️")
     with st.form("isolate_form"):
-        iso_uid = st.text_input("User object ID *")
-        iso_upn = st.text_input("UPN *")
-        iso_aid = st.text_input("Alert ID *")
-        iso_rsn = st.text_area("Alert reason *")
+        iso_upn = st.text_input("User UPN *", placeholder="jane@yourdomain.com")
+        iso_aid = st.text_input("Alert ID *", placeholder="ALERT-001")
+        iso_rsn = st.text_area("Alert reason *", placeholder="Suspicious sign-in detected")
         iso_sev = st.selectbox("Severity *", ["high", "medium", "low"])
         iso_sub = st.form_submit_button("🚨 Isolate User", type="primary")
 
     if iso_sub:
         errors = []
-        if not iso_uid: errors.append("User object ID is required.")
         if not iso_upn: errors.append("UPN is required.")
         if not iso_aid: errors.append("Alert ID is required.")
         if not iso_rsn: errors.append("Alert reason is required.")
         for e in errors: st.error(e)
         if not errors:
             from user_bot.triggers.admin_portal import handle_admin_request
-            with st.spinner("Isolating..."):
+            with st.spinner("Looking up user..."):
                 try:
-                    state = asyncio.run(handle_admin_request({
-                        "action": "isolate_user", "requested_by": "streamlit_admin",
-                        "payload": {
-                            "user_id": iso_uid, "user_principal_name": iso_upn,
-                            "alert_id": iso_aid, "alert_reason": iso_rsn,
-                            "severity": iso_sev, "auto_isolate": iso_sev == "high",
-                        },
-                    }))
-                    s = state.get("status")
-                    if s in ("completed","isolated"): st.success("✅ User isolated."); st.json(state.get("result", {}))
-                    elif s == "escalated":            st.warning("⏳ Escalated for approval.")
-                    else:                             st.error(f"Status: {s}")
+                    u       = asyncio.run(client.get_user_by_upn(iso_upn))
+                    iso_uid = u["id"]
                 except Exception as exc:
-                    st.error(f"Error: {exc}")
+                    st.error(f"User not found: {exc}")
+                    iso_uid = None
+            if iso_uid:
+                with st.spinner("Isolating..."):
+                    try:
+                        state = asyncio.run(handle_admin_request({
+                            "action": "isolate_user", "requested_by": "streamlit_admin",
+                            "payload": {
+                                "user_id": iso_uid, "user_principal_name": iso_upn,
+                                "alert_id": iso_aid, "alert_reason": iso_rsn,
+                                "severity": iso_sev, "auto_isolate": iso_sev == "high",
+                            },
+                        }))
+                        s = state.get("status")
+                        if s in ("completed","isolated"): st.success("✅ User isolated."); st.json(state.get("result", {}))
+                        elif s == "escalated":            st.warning("⏳ Escalated for approval.")
+                        else:                             st.error(f"Status: {s}")
+                    except Exception as exc:
+                        st.error(f"Error: {exc}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

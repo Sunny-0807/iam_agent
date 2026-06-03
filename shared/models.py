@@ -76,6 +76,7 @@ class RiskIsolationRequest(BaseModel):
     alert_reason:         str
     sentinel_incident_id: str | None = None
     auto_isolate:         bool = True
+    requested_by:         str = "sentinel_alert"
 
 
 # ── App Models ────────────────────────────────────────────────────────────────

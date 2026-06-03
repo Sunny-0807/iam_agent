@@ -1,0 +1,109 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Agentic IAM — docker-compose.yml
+#
+# Three services from one image:
+#   streamlit     → Admin UI on http://localhost:8501
+#   user-watcher  → Monitors watched_inbox/ for user CSV files
+#   app-watcher   → Monitors watched_apps_inbox/ for app CSV files
+#
+# Usage:
+#   docker-compose up --build          # build and start all
+#   docker-compose up streamlit        # start UI only
+#   docker-compose logs -f streamlit   # tail logs
+#   docker-compose down                # stop all
+# ─────────────────────────────────────────────────────────────────────────────
+
+version: "3.9"
+
+services:
+
+  # ── Streamlit frontend ──────────────────────────────────────────────────────
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agentic-iam-ui
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=docker
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+    volumes:
+      # Watched folders — shared with watcher containers
+      - ./watched_inbox:/app/watched_inbox
+      - ./watched_processing:/app/watched_processing
+      - ./watched_processed:/app/watched_processed
+      - ./watched_failed:/app/watched_failed
+      - ./watched_apps_inbox:/app/watched_apps_inbox
+      - ./watched_apps_processing:/app/watched_apps_processing
+      - ./watched_apps_processed:/app/watched_apps_processed
+      - ./watched_apps_failed:/app/watched_apps_failed
+      # Audit log persisted on host
+      - ./audit.jsonl:/app/audit.jsonl
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── User folder watcher ─────────────────────────────────────────────────────
+  user-watcher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agentic-iam-user-watcher
+    restart: unless-stopped
+    command: ["python", "user_bot/triggers/folder_watcher.py"]
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=docker
+      # Override watcher paths to use container paths
+      - WATCHER_INBOX=/app/watched_inbox
+      - WATCHER_PROCESSING=/app/watched_processing
+      - WATCHER_PROCESSED=/app/watched_processed
+      - WATCHER_FAILED=/app/watched_failed
+    volumes:
+      # Shared with streamlit container
+      - ./watched_inbox:/app/watched_inbox
+      - ./watched_processing:/app/watched_processing
+      - ./watched_processed:/app/watched_processed
+      - ./watched_failed:/app/watched_failed
+      - ./audit.jsonl:/app/audit.jsonl
+    depends_on:
+      streamlit:
+        condition: service_healthy
+
+  # ── App folder watcher ──────────────────────────────────────────────────────
+  app-watcher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agentic-iam-app-watcher
+    restart: unless-stopped
+    command: ["python", "app_bot/triggers/app_folder_watcher.py"]
+    env_file:
+      - .env
+    environment:
+      - ENVIRONMENT=docker
+      # Override watcher paths to use container paths
+      - APP_WATCHER_INBOX=/app/watched_apps_inbox
+      - APP_WATCHER_PROCESSING=/app/watched_apps_processing
+      - APP_WATCHER_PROCESSED=/app/watched_apps_processed
+      - APP_WATCHER_FAILED=/app/watched_apps_failed
+    volumes:
+      # Shared with streamlit container
+      - ./watched_apps_inbox:/app/watched_apps_inbox
+      - ./watched_apps_processing:/app/watched_apps_processing
+      - ./watched_apps_processed:/app/watched_apps_processed
+      - ./watched_apps_failed:/app/watched_apps_failed
+      - ./audit.jsonl:/app/audit.jsonl
+    depends_on:
+      streamlit:
+        condition: service_healthy
+

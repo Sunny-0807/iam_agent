@@ -244,6 +244,14 @@ class IAMOrchestrator:
         if state.get("error"):
             return "handle_error"
         if state.get("intent") == FlowName.RISK_ISOLATION:
+            # Admin-initiated isolations (from admin_portal or Streamlit) already
+            # have the severity set by the admin — skip the AI risk scorer and
+            # go straight to policy check. Only Sentinel-triggered isolations
+            # (requested_by="sentinel_alert") need AI risk scoring.
+            payload = state.get("request_payload")
+            requested_by = getattr(payload, "requested_by", "") or ""
+            if requested_by in ("streamlit_admin", "admin_portal"):
+                return "check_policy"
             return "score_risk"
         return "check_policy"
 
@@ -293,3 +301,4 @@ class IAMOrchestrator:
             final_state.get("status"), final_state.get("intent"),
         )
         return final_state
+    

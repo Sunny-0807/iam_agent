@@ -76,8 +76,9 @@ async def handle_admin_request(request_body: dict) -> dict:
         request = RiskIsolationRequest(
             **{
                 **payload,
-                "severity": severity,
-                "auto_isolate": severity == RiskSeverity.HIGH,
+                "severity":      severity,
+                "auto_isolate":  payload.get("auto_isolate", severity == RiskSeverity.HIGH),
+                "requested_by":  requested_by,
             }
         )
         request_text = (
@@ -86,3 +87,4 @@ async def handle_admin_request(request_body: dict) -> dict:
         )
 
     return await handle_request(request_text=request_text, request_payload=request)
+

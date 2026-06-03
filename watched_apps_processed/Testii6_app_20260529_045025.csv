@@ -1,0 +1,3 @@
+display_name,app_type,template_id,entity_id,reply_url,sign_on_url,owner_upn,assigned_group_names,status,app_id,cert_thumbprint,duration_seconds,error
+JumpCloud SP Test,non_gallery,,https://sso.jumpcloud.com/saml2/testapp,https://sso.jumpcloud.com/saml2/testapp,https://sso.jumpcloud.com/saml2/testapp,iam.yashgabra@michaelkloudkrafthotmail.onmicrosoft.com,,completed,07c5a5ab-941b-4e22-bd8e-519ae37a071f,0460F55B1C488287A3F52D98665C198CCC4634D8,17.64,
+Authentik SP Test,non_gallery,,https://authentik.company/saml/sp,https://authentik.company/source/saml/<slug>/acs/,https://authentik.company/,iam.yashgabra@michaelkloudkrafthotmail.onmicrosoft.com,,completed,2d5ebdef-0c90-4424-9bfc-603315ea7d26,8DB5DB8F152569FC8656CA0FBED98F82F8785354,18.46,

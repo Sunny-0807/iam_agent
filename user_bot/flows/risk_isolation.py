@@ -76,11 +76,26 @@ async def run_risk_isolation(request: RiskIsolationRequest) -> dict:
         )
 
         # ── Step 4: Force password reset ──────────────────────────────────────
-        await client.force_password_reset(request.user_id)
-        graph_ops.append(f"PATCH /users/{request.user_id} (force password reset)")
-        logger.warning(
-            "SECURITY: Password reset forced for user=%s", request.user_principal_name
-        )
+        # Requires User.ReadWrite.All or Directory.AccessAsUser.All at app level.
+        # Catch 403 and continue — account disable + session revoke are the
+        # critical steps; password reset is best-effort.
+        password_reset_forced = False
+        try:
+            await client.force_password_reset(request.user_id)
+            graph_ops.append(f"PATCH /users/{request.user_id} (force password reset)")
+            logger.warning(
+                "SECURITY: Password reset forced for user=%s", request.user_principal_name
+            )
+            password_reset_forced = True
+        except Exception as _pwr_exc:
+            logger.warning(
+                "SECURITY: Could not force password reset for user=%s: %s "
+                "(requires User.ReadWrite.All — account is still disabled and sessions revoked)",
+                request.user_principal_name, _pwr_exc,
+            )
+            graph_ops.append(
+                f"PATCH /users/{request.user_id} (force password reset — SKIPPED: {_pwr_exc})"
+            )
 
         # ── Step 5: Audit log ─────────────────────────────────────────────────
         await audit.log(
@@ -111,7 +126,7 @@ async def run_risk_isolation(request: RiskIsolationRequest) -> dict:
             "severity": request.severity.value,
             "account_disabled": True,
             "sessions_revoked": True,
-            "password_reset_forced": True,
+            "password_reset_forced": password_reset_forced,
             "was_already_disabled": already_disabled,
             "status": "isolated",
         }
@@ -157,3 +172,4 @@ async def run_risk_isolation(request: RiskIsolationRequest) -> dict:
             },
         )
         raise
+
