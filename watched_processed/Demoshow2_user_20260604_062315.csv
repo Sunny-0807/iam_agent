@@ -1,0 +1,4 @@
+display_name,user_principal_name,department,job_title,usage_location,mail_nickname,manager_upn,group_names,license_name,status,user_id,duration_seconds,details
+ITC Intern19,itcintern19@michaelkloudkrafthotmail.onmicrosoft.com,Cybersecurity,Cyber Intern,IN,itcintern19,,ITC-Cybersecurity,,completed,8da557c5-821f-48cf-a39c-fa6a889be7bd,0.65,All operations completed
+ITC Intern20,itcintern20@michaelkloudkrafthotmail.onmicrosoft.com,Data,Data Analyst Intern,US,itcintern20,,ITC-Data,MICROSOFT FLOW FREE,completed,a480388a-835f-4932-9ee8-dee057542e52,1.19,All operations completed
+ITC Intern21,itcintern21@michaelkloudkrafthotmail.onmicrosoft.com,Platforms,AI Intern,GB,itcintern21,,ITC-AI|ITC-Platforms,,completed,3e50d162-88ed-4f87-abc8-b82177a370e0,1.05,All operations completed

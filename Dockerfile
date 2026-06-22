@@ -54,6 +54,14 @@ RUN mkdir -p \
 ENV STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
 ENV STREAMLIT_SERVER_HEADLESS=true
 ENV STREAMLIT_SERVER_PORT=8501
+
+# Security note (Finding 6 & 7): Binding to 0.0.0.0 is intentional and
+# required for Docker containers to receive traffic from the host via port
+# mapping. This is the standard Docker pattern — the container listens on
+# all interfaces internally, but Docker's port mapping (8501:8501) controls
+# which host interfaces are exposed externally.
+# In production: place behind Azure Application Gateway or a reverse proxy
+# to restrict public access. Never expose port 8501 directly to the internet.
 ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
 
 # ── Expose Streamlit port ─────────────────────────────────────────────────────

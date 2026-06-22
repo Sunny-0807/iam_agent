@@ -102,13 +102,34 @@ def _acquire_via_managed_identity() -> tuple[str, int]:
         ) from exc
 
 
+def _validate_tenant_id(tenant_id: str) -> None:
+    """
+    Validate that tenant_id is a non-empty GUID before constructing authority URL.
+    Prevents authority URL injection if tenant_id is malformed or empty.
+    Raises AuthenticationError if invalid.
+    """
+    import re
+    guid_pattern = re.compile(
+        r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+        re.IGNORECASE,
+    )
+    if not tenant_id or not guid_pattern.match(tenant_id.strip()):
+        raise AuthenticationError(
+            "AZURE_TENANT_ID is missing or not a valid GUID. "
+            "Check your .env file or environment configuration."
+        )
+
+
 def _acquire_via_service_principal() -> tuple[str, int]:
     """
     Acquire token using client credentials (service principal).
     Used for local development and CI pipelines.
     """
     try:
-        authority = f"https://login.microsoftonline.com/{config.tenant_id}"
+        # Validate tenant_id before constructing authority URL (Finding 13)
+        _validate_tenant_id(config.tenant_id)
+        authority = f"https://login.microsoftonline.com/{config.tenant_id.strip()}"
+
         app = msal.ConfidentialClientApplication(
             client_id=config.client_id,
             client_credential=config.client_secret,
@@ -118,9 +139,13 @@ def _acquire_via_service_principal() -> tuple[str, int]:
         result = app.acquire_token_for_client(scopes=GRAPH_SCOPE)
 
         if "access_token" not in result:
+            # Use safe error code only — never expose raw result which may
+            # contain partial credential information (Finding 12)
+            error_code = result.get("error", "unknown_error")
             raise AuthenticationError(
-                f"Service principal token acquisition failed: "
-                f"{result.get('error_description', 'unknown error')}"
+                f"Service principal token acquisition failed. "
+                f"Error code: {error_code}. "
+                "Check AZURE_CLIENT_ID, AZURE_CLIENT_SECRET and API permissions."
             )
 
         return result["access_token"], result.get("expires_in", 3600)
@@ -128,6 +153,9 @@ def _acquire_via_service_principal() -> tuple[str, int]:
     except AuthenticationError:
         raise
     except Exception as exc:
+        # Sanitize exception message — avoid leaking credential values (Finding 12)
         raise AuthenticationError(
-            f"Service principal authentication failed: {exc}"
+            "Service principal authentication failed. "
+            "Verify AZURE_TENANT_ID, AZURE_CLIENT_ID and AZURE_CLIENT_SECRET."
         ) from exc
+    

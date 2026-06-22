@@ -79,5 +79,49 @@ def _require(key: str) -> str:
     return value
 
 
+def _validate_config(cfg: "Config") -> None:
+    """
+    Startup validation of critical configuration values. (Finding 11)
+    Catches misconfigurations early before any API calls are made.
+    """
+    import re
+    guid_re = re.compile(
+        r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+        re.IGNORECASE,
+    )
+
+    # Validate tenant_id is a proper GUID
+    if not cfg.tenant_id or not guid_re.match(cfg.tenant_id.strip()):
+        raise EnvironmentError(
+            "AZURE_TENANT_ID is not a valid GUID. "
+            "Expected format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+        )
+
+    # Validate OpenAI endpoint is a real HTTPS URL
+    if not cfg.openai_endpoint.startswith("https://"):
+        raise EnvironmentError(
+            "OPENAI_ENDPOINT must start with 'https://'. "
+            f"Got: {cfg.openai_endpoint[:30]}..."
+        )
+
+    # Validate Graph base URL points to Microsoft
+    if not cfg.graph_base_url.startswith("https://graph.microsoft.com"):
+        raise EnvironmentError(
+            "GRAPH_BASE_URL must start with 'https://graph.microsoft.com'. "
+            f"Got: {cfg.graph_base_url[:30]}..."
+        )
+
+    # Warn if SKIP_APPROVAL is enabled outside local dev
+    if cfg.skip_approval and cfg.environment.lower() not in ("dev", "local", "docker"):
+        import logging
+        logging.getLogger(__name__).warning(
+            "SKIP_APPROVAL=true is set in a non-dev environment (%s). "
+            "This bypasses the approval gate — never use in production.",
+            cfg.environment,
+        )
+
+
 # Singleton -- imported by all modules
 config = Config.from_env()
+_validate_config(config)
+
